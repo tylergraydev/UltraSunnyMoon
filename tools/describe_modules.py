@@ -20,9 +20,11 @@ if __name__ == '__main__':
             for item in cro.named_export_table.obj:
                 segment = cro.segment_table.obj[item.seg_off.index]
                 value = segment.off + item.seg_off.off
+                thumb = segment.type.name == 'TEXT' and bool(value & 1)
                 exports.append({'name':str(item.name.obj), 'segment':item.seg_off.index,
-                                'encoded_address':hex(value), 'canonical_address':hex(value & ~1),
-                                'thumb_bit':bool(value & 1)})
+                                'segment_type':segment.type.name,
+                                'encoded_address':hex(value), 'canonical_address':hex(value & ~1 if thumb else value),
+                                'thumb_bit':thumb})
     output = Path('analysis/private')
     (output/'module-layouts.json').write_text(json.dumps(summaries,indent=2), encoding='utf-8')
     (output/'static-exports.json').write_text(json.dumps(exports,indent=2), encoding='utf-8')
