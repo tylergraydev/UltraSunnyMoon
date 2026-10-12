@@ -2,8 +2,8 @@
 
 The original and rebuilt Ultra Sun base applications are packaged locally
 as decrypted standalone CXIs. Both pass container and payload verification.
-**No original-game or rebuilt-game execution has been observed yet.**
-The runtime comparison remains open in
+**Original-game startup is now observed in runtime logs; rebuilt-game
+execution and visual gameplay remain unverified.** The runtime comparison remains open in
 [#19](https://github.com/tylergraydev/UltraSunnyMoon/issues/19).
 
 ## Packages
@@ -74,6 +74,38 @@ directories must stay inside `analysis/private`. The two packages require
 about 7.4 GB together. Runtime executables, configurations, generated games,
 logs, and proof artifacts remain local and ignored.
 
+## Original-game startup baseline
+
+The user manually launched the original portable profile and `original.cxi`.
+The running process title identifies Pokémon Ultra Sun; the profile's
+recent-file record names the prepared original package. Its independently
+measured package digest matches the verified original CXI above. This binds
+the selected input through profile records rather than process-memory
+attestation.
+
+The retained log reports Azahar `2126.2 | HEAD-219d743` and program ID
+`00040000001b5000`. Recorded settings are CPU JIT enabled, CPU clock 100%,
+OpenGL, hardware shaders and shader JIT enabled, resolution factor 1, New
+3DS mode enabled, and automatic region (`-1`). Raw configuration and log
+snapshots are retained privately with hashes.
+
+The game's `LangSelect` CRO loaded at `0x006DD000`, with fixed end
+`0x006E8000`. The loader reports anonymous exports to the static module.
+This is observed module-loading evidence; loaded instruction bytes and
+resolved imports have not been read back from runtime memory.
+
+Fresh-profile logs also include missing save-data/cache files and stubbed
+services. Their presence alone is not a crash result. The visible screen,
+first gameplay path, and rebuilt comparison have not been confirmed yet.
+
+Collect a manually launched run without controlling its window:
+
+```powershell
+.\.local\venv\Scripts\python.exe tools/collect_runtime.py analysis/private/azahar-runtime/original/azahar-windows-msys2-2126.2/user analysis/private/runtime-packages/original.cxi analysis/private/my-original-observation
+```
+
+Use `--screen` only to record a screen actually reported by the user.
+
 ## Remaining execution gate
 
 Automatic approval review rejected the attempted Azahar window launch:
@@ -83,12 +115,11 @@ same rejection and Azahar was absent from the Computer Use app inventory.
 Session-level app access remains unavailable. No launch through another
 method was attempted after that rejection.
 
-Once Azahar access is approved, launch the original CXI in its fresh
-profile, record actual version/configuration and any startup requirements,
-and observe the first reproducible in-game path. Then repeat with the
-rebuilt CXI under equivalent initial conditions. Record screenshots/logs
-locally and compare observations. A package verification pass or the prior
-isolated helper tests do not establish game compatibility.
+Manual launch and local-log collection now provide an alternative to window
+automation. Confirm the visible original-game checkpoint, then repeat with
+the rebuilt CXI under equivalent initial conditions. Record screenshots/logs
+locally and compare observations. Loader/module startup, package verification,
+and isolated helper tests do not establish complete game compatibility.
 
 Phase four remains open until a working rebuilt-game comparison is
 observed. Exact compiler matching remains separate in #15.
