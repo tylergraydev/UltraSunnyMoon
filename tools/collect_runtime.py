@@ -9,7 +9,7 @@ from pathlib import Path
 import re
 
 
-def collect(user_path, package_path, destination, screen=None):
+def collect(user_path, package_path, destination, screen=None, screen_source='user'):
     user, package = Path(user_path), Path(package_path).resolve()
     log = (user/'log/azahar_log.txt').read_bytes()
     config = (user/'config/qt-config.ini').read_bytes()
@@ -46,9 +46,10 @@ def collect(user_path, package_path, destination, screen=None):
     report = {'runtime_version': version[1], 'program_id': title[1].lower(),
               'package_sha256': package_hash.hexdigest(), 'config_sha256': hashlib.sha256(config).hexdigest(),
               'log_sha256': hashlib.sha256(log).hexdigest(), 'settings': settings,
-              'loaded_modules': modules, 'user_reported_screen': screen,
+              'loaded_modules': modules, 'user_reported_screen': screen if screen_source == 'user' else None,
+              'screen_observation': {'description': screen, 'source': screen_source} if screen else None,
               'input_binding': 'user-profile recent-file record; no process memory attestation',
-              'scope': 'Observed loader/config/module log events; visual gameplay unverified unless user reports it'}
+              'scope': 'Loader/config/module events and declared screen observation; live-byte proof is separate RPC evidence'}
     (root/'observations.json').write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')
     print(json.dumps(report, indent=2))
     return report
@@ -59,6 +60,7 @@ if __name__ == '__main__':
     parser.add_argument('user_directory')
     parser.add_argument('package')
     parser.add_argument('destination')
-    parser.add_argument('--screen', help='Record a user-reported screen, not an automated observation')
+    parser.add_argument('--screen', help='Record a screen description with its declared observation source')
+    parser.add_argument('--screen-source', choices=('user', 'agent-rpc-frame'), default='user')
     args = parser.parse_args()
-    collect(args.user_directory, args.package, args.destination, args.screen)
+    collect(args.user_directory, args.package, args.destination, args.screen, args.screen_source)

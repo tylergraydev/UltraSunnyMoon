@@ -3,7 +3,8 @@ param([string]$RuntimeDirectory = 'analysis/private/azahar-runtime')
 $ErrorActionPreference = 'Stop'
 $projectRoot = (Resolve-Path "$PSScriptRoot/..").Path
 $privateRoot = [IO.Path]::GetFullPath((Join-Path $projectRoot 'analysis/private')) + [IO.Path]::DirectorySeparatorChar
-$runtimeRoot = (Resolve-Path (Join-Path $projectRoot $RuntimeDirectory)).Path
+$runtimeInput = if ([IO.Path]::IsPathRooted($RuntimeDirectory)) { $RuntimeDirectory } else { Join-Path $projectRoot $RuntimeDirectory }
+$runtimeRoot = (Resolve-Path -LiteralPath $runtimeInput).Path
 if (-not $runtimeRoot.StartsWith($privateRoot, [StringComparison]::OrdinalIgnoreCase)) {
     throw 'Use an isolated private runtime directory.'
 }
@@ -32,11 +33,13 @@ foreach ($target in $targets) {
         if ($text -notmatch '(?m)^enable_rpc_server=') {
             throw 'Existing profile has no RPC key; inspect its configuration before editing.'
         }
-        $text = [regex]::Replace($text, '(?m)^enable_rpc_server\\\\default=[^\r\n]*', 'enable_rpc_server\\default=false')
+        # QSettings writes one slash. Normalize the earlier doubled-slash
+        # marker too, so already-prepared unused profiles recover correctly.
+        $text = [regex]::Replace($text, '(?m)^enable_rpc_server\\+default=[^\r\n]*', 'enable_rpc_server\default=false')
         $text = [regex]::Replace($text, '(?m)^enable_rpc_server=[^\r\n]*', 'enable_rpc_server=true')
     } else {
         New-Item -ItemType Directory -Force (Split-Path $target) | Out-Null
-        $text = "[Debugging]`r`nenable_rpc_server\\default=false`r`nenable_rpc_server=true`r`n"
+        $text = "[Debugging]`r`nenable_rpc_server\default=false`r`nenable_rpc_server=true`r`n"
     }
     [IO.File]::WriteAllText($target, $text, $encoding)
 }

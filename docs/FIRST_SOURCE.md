@@ -129,8 +129,9 @@ retains the unchanged baseline.
 The source compilation and initialized-image replacement milestone is
 tracked in [#18](https://github.com/tylergraydev/UltraSunnyMoon/issues/18).
 The rebuilt raw `code.bin` is now [packaged and independently verified](RUNTIME.md)
-in a decrypted emulator CXI. It has not been executed in the game.
-A pinned original-game runtime baseline and observed original/rebuilt
-comparison remain required before claiming a working rebuilt game.
-Phase four remains open for that gate. Exact matching and retail toolchain identification remain in
+in a decrypted emulator CXI. Original and rebuilt packages now both reach
+language selection, with live helper bytes and rendered RPC frames verified.
+Execution counts, exception behavior, and gameplay beyond that startup
+checkpoint remain unverified. Phase four remains open for those runtime
+gates. Exact matching and retail toolchain identification remain in
 [#15](https://github.com/tylergraydev/UltraSunnyMoon/issues/15).

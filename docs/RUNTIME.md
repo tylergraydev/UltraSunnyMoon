@@ -2,8 +2,9 @@
 
 The original and rebuilt Ultra Sun base applications are packaged locally
 as decrypted standalone CXIs. Both pass container and payload verification.
-**Original-game startup is now observed in runtime logs; rebuilt-game
-execution and visual gameplay remain unverified.** The runtime comparison remains open in
+**Both original and rebuilt games now reach the language-selection screen,
+with live helper bytes and RPC frames verified.** Gameplay beyond this
+startup checkpoint remains unverified. The runtime comparison remains open in
 [#19](https://github.com/tylergraydev/UltraSunnyMoon/issues/19).
 
 ## Packages
@@ -57,7 +58,7 @@ fresh `user` directory beside the executable. Azahar's
 [user-path handling](https://github.com/azahar-emu/azahar/blob/2126.2/src/common/file_util.cpp)
 selects that directory when present. Existing installed-game saves and
 settings are not copied or modified. The preparation tool does not launch
-either runtime. No measured runtime configuration is recorded yet.
+either runtime. Actual runtime settings are recorded in the observations below.
 
 ## Reproduce preparation
 
@@ -95,8 +96,9 @@ This is observed module-loading evidence; loaded instruction bytes and
 resolved imports have not been read back from runtime memory.
 
 Fresh-profile logs also include missing save-data/cache files and stubbed
-services. Their presence alone is not a crash result. The visible screen,
-first gameplay path, and rebuilt comparison have not been confirmed yet.
+services. Their presence alone is not a crash result. Both visible startup
+screens are now confirmed through RPC frames; the first gameplay path
+remains open.
 
 Collect a manually launched run without controlling its window:
 
@@ -104,7 +106,46 @@ Collect a manually launched run without controlling its window:
 .\.local\venv\Scripts\python.exe tools/collect_runtime.py analysis/private/azahar-runtime/original/azahar-windows-msys2-2126.2/user analysis/private/runtime-packages/original.cxi analysis/private/my-original-observation
 ```
 
-Use `--screen` only to record a screen actually reported by the user.
+Use `--screen` with an explicit `--screen-source` to distinguish user
+reports from agent inspection of captured RPC frames.
+
+## Live original/rebuilt checkpoint
+
+The original and rebuilt packages were launched sequentially through
+Azahar's game-file command-line interface in their separate prepared
+profiles. Both use the eight runtime settings recorded above. RPC selected
+the Ultra Sun process `momiji`, read the 34-byte helper at `0x00100050`,
+and captured a 400×480 rendered game frame for each run.
+
+| Live evidence | Original | Rebuilt |
+| --- | --- | --- |
+| Helper SHA-256 | `897f0c9729d5648e56c58ce2cf310343b4b95613959e2d8b054b574b38601474` | `e13c194dbabfc40d5885f2956701b5e6264c55cf818e202c4dc4cd6538ced920` |
+| Observed screen | Language selection, English highlighted | Language selection, English highlighted |
+
+The original live helper exactly matches the pinned original image. The
+rebuilt live helper exactly matches the compiled source replacement, and
+differs from the original. This is runtime-memory attestation for that
+selected function; it is not just a package or log observation.
+
+Both RPC PNGs were visually inspected. They show the same startup screen
+and selection. Frames were captured at different times and their hashes differ;
+no pixel-identical or deterministic-timing claim is made. Raw screenshots,
+loaded bytes, logs, configurations, and comparison receipts remain private.
+The evidence comparator rejects original-helper substitution and frame
+corruption. Eighteen source-owned tests pass, including a regression check
+for Qt's actual one-backslash default marker and the earlier malformed
+marker's repair.
+
+Compare retained RPC evidence:
+
+```powershell
+.\.local\venv\Scripts\python.exe tools/compare_runtime_rpc.py analysis/private/rpc-original-verified analysis/private/rpc-rebuilt-verified extracted/base/exefs/code.bin analysis/private/helper-integrated-final/out/code.bin
+```
+
+The selected compiled helper remains **behavior-tested, nonmatching**. A
+language-menu boot does not prove exception compatibility, execution counts
+for this helper, or gameplay/title/overworld compatibility. Those remain
+separate gates.
 
 ## Remaining execution gate
 
@@ -118,9 +159,13 @@ and optional rendered-frame capture. It binds the client hash, Ultra Sun
 title ID, and expected original/rebuilt helper bytes to private evidence.
 No writes to game memory or controller-input injection are exposed.
 
-RPC is disabled in the current original-game session. A read-only transport
-probe did not reach a server, so no RPC screenshot or live-byte proof is
-claimed yet. Azahar's [debug configuration](https://github.com/azahar-emu/azahar/blob/2126.2/src/citra_qt/configuration/configure_debug.cpp)
+RPC is now enabled and tested in both isolated profiles. The first restart
+exposed a configuration-helper bug: Qt's default marker was not updated,
+so Azahar reset RPC to disabled. The tool now emits the actual one-backslash
+QSettings key and normalizes the earlier malformed marker. A second restart
+confirmed the active RPC listener and enabled setting.
+
+Azahar's [debug configuration](https://github.com/azahar-emu/azahar/blob/2126.2/src/citra_qt/configuration/configure_debug.cpp)
 only allows RPC to change while emulation is stopped. To prevent the app
 from overwriting an external configuration edit on exit, close the prepared
 Azahar before running:
@@ -134,7 +179,8 @@ backs up existing configurations, and sets both the RPC value and its
 QSettings default marker. A source-owned configuration fixture verifies
 setting preservation and the backup. Only isolated profiles are touched.
 
-After manually reopening the original profile and its game:
+After reopening the original profile and its game through the GUI or its
+supported command-line game path:
 
 ```powershell
 .\.local\venv\Scripts\python.exe tools/probe_runtime_rpc.py analysis/private/azahar-runtime/original/azahar-windows-msys2-2126.2 extracted/base/exefs/code.bin analysis/private/my-original-rpc-proof
@@ -155,14 +201,16 @@ Automatic approval review rejected the attempted Azahar window launch:
 “Computer Use was not approved to use azahar.” The user explicitly approved
 the original/rebuilt comparison, but the subsequent launch received the
 same rejection and Azahar was absent from the Computer Use app inventory.
-Session-level app access remains unavailable. No launch through another
-method was attempted after that rejection.
+Native window-control access remains unavailable. Subsequent work uses the
+separately authorized Azahar scripting and game-file CLI interfaces, without
+desktop screenshot capture or injected Windows input.
 
-Manual launch and local-log collection now provide an alternative to window
-automation. Confirm the visible original-game checkpoint, then repeat with
-the rebuilt CXI under equivalent initial conditions. Record screenshots/logs
-locally and compare observations. Loader/module startup, package verification,
-and isolated helper tests do not establish complete game compatibility.
+Azahar's API now supplies live-byte proof and rendered-frame observation.
+Next extend the comparison beyond language selection into a reproducible
+gameplay path. Controller input is not exposed by the shipped RPC client;
+supported input-movie replay or manual game input must provide that part.
+The original/rebuilt startup checkpoint does not establish complete game
+compatibility.
 
 Phase four remains open until a working rebuilt-game comparison is
 observed. Exact compiler matching remains separate in #15.
