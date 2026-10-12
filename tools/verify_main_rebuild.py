@@ -22,6 +22,13 @@ def verify(code_path, exheader_path, root):
     plan = json.loads((root/'layout.json').read_text())
     replacement = plan.get('replacement')
     expected_image = bytearray(code)
+    replacements = {}
+    bss = plan.get('bss_replacement')
+    if bss:
+        from bss_selection import validate
+        payload = validate((root/'build/startup_zero_helper.o').read_bytes(), bss, code, header)
+        expected_image[0x24:0x48] = payload
+        replacements['startup_zero_helper'] = (0x24, 36, bss)
     if replacement:
         from compile_helper import standalone_helper
         object_data = (root/'build/aeabi_vec_ctor.o').read_bytes()
@@ -38,6 +45,9 @@ def verify(code_path, exheader_path, root):
         if replacement['policy'] not in ('exact', 'behavior-tested-nonmatching'):
             raise ValueError('Unsupported replacement policy')
         expected_image[0x50:0x72] = payload
+        replacements['aeabi_vec_ctor'] = (0x50, 34, replacement)
+    if plan['source_replacements'] != len(replacements):
+        raise ValueError('Replacement count differs')
     expected, cursor = {}, 0
     for name, offset, flags in (('.text', 0x10, 6), ('.rodata', 0x20, 2), ('.data', 0x30, 3)):
         address, pages, logical = struct.unpack_from('<III', header, offset)
@@ -61,10 +71,12 @@ def verify(code_path, exheader_path, root):
         sections = elf_sections(path.read_bytes())
         if set(sections) != {obj['section']} or sections[obj['section']]['bytes'] != code[position:position+obj['size']]:
             raise ValueError('Selected split object differs from original range')
-        is_replacement = replacement and obj['name'] == 'aeabi_vec_ctor'
+        selected = replacements.get(obj['name'])
+        if selected and (obj['offset'], obj['size'], obj['section']) != (selected[0], selected[1], '.text'):
+            raise ValueError('Replacement range differs')
         receipts.append({'name': obj['name'], 'offset': position, 'size': obj['size'],
-                         'section': obj['section'], 'origin': 'compiled-source' if is_replacement else 'original-split',
-                         'sha256': replacement['object_sha256'] if is_replacement else hashlib.sha256(path.read_bytes()).hexdigest()})
+                         'section': obj['section'], 'origin': 'compiled-source' if selected else 'original-split',
+                         'sha256': selected[2]['object_sha256'] if selected else hashlib.sha256(path.read_bytes()).hexdigest()})
         position += obj['size']
     if position != len(code) or object_paths != set((root/'split/code.bin').glob('*.o')):
         raise ValueError('Split objects do not cover the full input exactly once')
@@ -80,6 +92,14 @@ def verify(code_path, exheader_path, root):
     loaded_names = [Path(p).name for p in re.findall(r'^LOAD (.*\.o)$', map_text, re.MULTILINE)]
     if loaded_names != selected_names:
         raise ValueError('Linker map object selection differs')
+    for obj, line, load in zip(plan['objects'], response, re.findall(r'^LOAD (.*\.o)$', map_text, re.MULTILINE)):
+        directory = 'build' if obj['name'] in replacements else 'split/code.bin'
+        suffix = '/'+directory+'/'+obj['name']+'.o'
+        if not all(p.strip('"').replace('\\', '/').endswith(suffix) for p in (line, load)):
+            raise ValueError('Linker selected an unexpected object path')
+    for name in replacements:
+        if name+'.o' not in selected_names:
+            raise ValueError('Selected replacement missing from layout')
     selected_helper_loads = [line.replace('\\', '/') for line in map_text.splitlines()
                             if line.startswith('LOAD ') and line.endswith('/aeabi_vec_ctor.o')]
     if len(selected_helper_loads) != 1 or not selected_helper_loads[0].endswith('/'+helper_directory+'/aeabi_vec_ctor.o'):
@@ -109,16 +129,17 @@ def verify(code_path, exheader_path, root):
     if rebuilt != expected_image:
         raise ValueError('Reconstructed code.bin differs from selected image')
     return {'verification_passed': True, 'exact_match': rebuilt == code,
-            'original_bytes_verified': len(code)-(34 if replacement else 0),
+            'original_bytes_verified': len(code)-sum(r[1] for r in replacements.values()),
             'sha256': hashlib.sha256(rebuilt).hexdigest(), 'original_sha256': code_hash,
             'exheader_sha256': header_hash, 'split_objects_verified': len(object_paths),
             'initialized_sections_verified': 3, 'load_mappings_verified': 3,
             'selected_object_receipts': receipts,
-            'source_replacements': 1 if replacement else 0,
-            'replacement_policy': replacement['policy'] if replacement else None,
+            'source_replacements': len(replacements),
+            'replacement_policies': {n: r[2]['policy'] for n, r in replacements.items()},
+            'replacement_policy': ('behavior-tested-nonmatching' if any(r[2]['policy'] == 'behavior-tested-nonmatching' for r in replacements.values()) else 'exact') if replacements else None,
             'changed_bytes': sum(a != b for a, b in zip(code, rebuilt)),
             'bss_size': struct.unpack_from('<I', header, 0x3c)[0],
-            'scope': 'Initialized image with explicit original/compiled object selection; BSS and game execution unverified.'}
+            'scope': 'Initialized image with explicit original/compiled object selection; behavior requires separate execution checks; game execution unverified.'}
 
 
 if __name__ == '__main__':

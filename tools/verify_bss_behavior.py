@@ -97,10 +97,17 @@ def execute(payload, *, pattern=0xa5, thumb_return=False):
             'stack_unchanged': True, 'thumb_return': thumb_return}
 
 
-def verify(code_path, header_path, object_path):
+def verify(code_path, header_path, object_path, build_directory=None):
     code, header, obj = (Path(p).read_bytes() for p in (code_path, header_path, object_path))
     check_bounds(code, header)
     compiled = standalone_helper(obj, 'ultrasun_clear_bss', thumb=False)
+    image = None
+    if build_directory:
+        from verify_main_rebuild import verify as verify_image
+        verify_image(code_path, header_path, build_directory)
+        image = (Path(build_directory)/'out/code.bin').read_bytes()
+        if image[0x24:0x48] != compiled:
+            raise ValueError('Integrated BSS differs from the selected object')
     cases = [{'pattern': 0xa5}, {'pattern': 0xff}, {'pattern': 0},
              {'pattern': None, 'thumb_return': True}]
     results = []
@@ -109,6 +116,8 @@ def verify(code_path, header_path, object_path):
         candidate = execute(compiled, **case)
         if original != candidate:
             raise ValueError('Original and compiled BSS behavior differs')
+        if image is not None and execute(image[0x24:0x48], **case) != original:
+            raise ValueError('Integrated BSS behavior differs')
         results.append({'case': case, 'result': candidate, 'passed': True})
     return {'entry': hex(ENTRY), 'mode': 'arm', 'bss_start': hex(BSS_START),
             'bss_end_exclusive': hex(BSS_END), 'bounds_verified_against_exheader': True,
@@ -118,7 +127,9 @@ def verify(code_path, header_path, object_path):
             'source_sha256': digest(Path('src/runtime/clear_bss.c').read_bytes()),
             'harness_sha256': digest(Path(__file__).read_bytes()),
             'exact_byte_match_including_literals': compiled == code[0x24:0x48],
-            'integrated': False,
+            'integrated': image is not None,
+            'integrated_cases_passed': len(results) if image is not None else 0,
+            'integrated_image_sha256': digest(image) if image is not None else None,
             'scope': 'Fixed-target isolated BSS clearing and ABI checks; no game execution proof'}
 
 
@@ -128,8 +139,9 @@ if __name__ == '__main__':
     parser.add_argument('exheader')
     parser.add_argument('object')
     parser.add_argument('--report')
+    parser.add_argument('--build-directory', help='Verify and execute the BSS payload from a selected build')
     args = parser.parse_args()
-    proof = verify(args.code, args.exheader, args.object)
+    proof = verify(args.code, args.exheader, args.object, args.build_directory)
     if args.report:
         destination = Path(args.report).resolve()
         destination.relative_to((Path.cwd()/'analysis/private').resolve())

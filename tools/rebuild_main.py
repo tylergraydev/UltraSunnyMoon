@@ -1,4 +1,4 @@
-"""Split/link the pinned Ultra Sun base main image without source replacements.
+"""Split/link the pinned Ultra Sun base main image with explicit source selection.
 
 Run in WSL. Generated retail objects and binaries stay under analysis/private.
 """
@@ -18,7 +18,7 @@ CODE_SHA256 = 'b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09'
 EXHEADER_SHA256 = 'e4682ebab1bef10bdede38589b18c98f6976b1ebdc6a3b2540757aedcfe141e2'
 
 
-def layout(code, exheader):
+def layout(code, exheader, bss=False):
     if digest(code) != CODE_SHA256 or digest(exheader) != EXHEADER_SHA256:
         raise ValueError('Inputs differ from the pinned base code/exheader')
     segments, cursor = [], 0
@@ -34,8 +34,8 @@ def layout(code, exheader):
         raise ValueError('This baseline requires contiguous initialized virtual regions')
     text = segments[0]
     ranges = [('original_startup_prefix', 0, 0x24, '$d'),
-              ('startup_zero_helper', 0x24, 0x1c, '$a'),
-              ('original_startup_literals', 0x40, 0x10, '$d'),
+              ('startup_zero_helper', 0x24, 0x24 if bss else 0x1c, '$a'),
+              ('original_startup_literals', 0x48 if bss else 0x40, 8 if bss else 0x10, '$d'),
               ('aeabi_vec_ctor', 0x50, 0x22, '$t'),
               ('original_text_before_arm_sample', 0x72, 0x45b4-0x72, '$d'),
               ('startup_arm_sample', 0x45b4, 0x4c, '$a'),
@@ -62,29 +62,37 @@ def worker(root, reader):
     import pipeline
     code = (root/'orig/code.bin').read_bytes()
     header = (root/'orig/exheader.bin').read_bytes()
-    plan = layout(code, header)
+    saved_plan = json.loads((root/'layout.json').read_text())
+    plan = layout(code, header, bss='bss_replacement' in saved_plan)
     binary = CTRBinary('code.bin', code, ExHeader.from_reader(BinaryReader('exheader.bin', header)))
     symbols = [Symbol(o['offset'], o['name'], o['mode'], o['size'], o['section']) for o in plan['objects']]
     split_dir = root/'split/code.bin'
     split_dir.mkdir(parents=True)
     info = SimpleNamespace(args={'progress_reports': False})
     targets = split_by_symbols(binary, split_dir, symbols, info)
-    saved_plan = json.loads((root/'layout.json').read_text())
     if 'replacement' in saved_plan:
         targets = [(offset, root/'build/aeabi_vec_ctor.o' if path.stem == 'aeabi_vec_ctor' else path)
+                   for offset, path in targets]
+    if 'bss_replacement' in saved_plan:
+        targets = [(offset, root/'build/startup_zero_helper.o' if path.stem == 'startup_zero_helper' else path)
                    for offset, path in targets]
     pipeline.LD_FLAGS = ['--entry=0x100000', '-T', str(root/'linker.ld')]
     linked = pipeline.link_all('code.bin', [p for _, p in targets], root/'out', str(root/'tools/ld'), info)
     pipeline.recreate_binary('code.bin', root/'out', str(root/'tools/objcopy'), linked, binary)
 
 
-def run(code_path, exheader_path, destination, reader, helper_object=None, allow_nonmatching=False):
+def run(code_path, exheader_path, destination, reader, helper_object=None, allow_nonmatching=False, bss_object=None):
     load_reader(reader)
     code, header = Path(code_path).read_bytes(), Path(exheader_path).read_bytes()
-    plan = layout(code, header)
+    plan = layout(code, header, bss=bool(bss_object))
     replacement = None
-    if allow_nonmatching and not helper_object:
-        raise ValueError('Nonmatching permission requires a compiled helper object')
+    if allow_nonmatching and not (helper_object or bss_object):
+        raise ValueError('Nonmatching permission requires a compiled object')
+    if bss_object:
+        from bss_selection import select
+        bss_object = Path(bss_object).resolve()
+        plan['bss_replacement'] = select(bss_object, code, header, allow_nonmatching)
+        plan['source_replacements'] += 1
     if helper_object:
         from compile_helper import standalone_helper, require_exact
         helper_object = Path(helper_object).resolve()
@@ -107,14 +115,17 @@ def run(code_path, exheader_path, destination, reader, helper_object=None, allow
                        'command': matches[0]['command'], 'behavior': behavior,
                        'policy': 'behavior-tested-nonmatching' if payload != code[0x50:0x72] else 'exact'}
         plan['replacement'] = replacement
-        plan['source_replacements'] = 1
+        plan['source_replacements'] += 1
     root = Path(destination).resolve()
     root.relative_to((Path.cwd()/'analysis/private').resolve())
     root.mkdir(parents=True, exist_ok=False)
     for name in ('orig', 'tools', 'out'):
         (root/name).mkdir()
-    if replacement:
+    if replacement or bss_object:
         (root/'build').mkdir()
+    if bss_object:
+        shutil.copyfile(bss_object, root/'build/startup_zero_helper.o')
+    if replacement:
         shutil.copyfile(helper_object, root/'build/aeabi_vec_ctor.o')
     (root/'orig/code.bin').write_bytes(code)
     (root/'orig/exheader.bin').write_bytes(header)
@@ -160,6 +171,7 @@ if __name__ == '__main__':
     parser.add_argument('destination')
     parser.add_argument('--reader', default='.local/pipeline-reference')
     parser.add_argument('--helper-object', help='Select the compiled helper with bound compilation/behavior receipts')
-    parser.add_argument('--allow-nonmatching', action='store_true', help='Explicitly permit a behavior-tested 34-byte nonmatch')
+    parser.add_argument('--bss-object', help='Select the compiled BSS clearer including its literals')
+    parser.add_argument('--allow-nonmatching', action='store_true', help='Explicitly permit behavior-tested nonmatching objects')
     args = parser.parse_args()
-    run(args.code, args.exheader, args.destination, args.reader, args.helper_object, args.allow_nonmatching)
+    run(args.code, args.exheader, args.destination, args.reader, args.helper_object, args.allow_nonmatching, args.bss_object)

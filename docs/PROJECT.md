@@ -86,6 +86,6 @@ even when used to prove an unchanged or hybrid build.
 | [MAIN_REBUILD](MAIN_REBUILD.md) | Unchanged main baseline and independent verification |
 | [REBUILD](REBUILD.md) | Unchanged AnaiTest CRO baseline |
 | [FIRST_SOURCE](FIRST_SOURCE.md) | Integrated array-construction helper |
-| [STARTUP_BSS](STARTUP_BSS.md) | Second reconstructed function, awaiting integration |
+| [STARTUP_BSS](STARTUP_BSS.md) | Integrated second function and four-policy verification |
 | [RUNTIME](RUNTIME.md) | Packages, Azahar/RPC, startup checkpoint, remaining gameplay gate |
 | [FEASIBILITY](FEASIBILITY.md) | Historical initial pilot; later milestones supersede its open questions |

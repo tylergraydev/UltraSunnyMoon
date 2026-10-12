@@ -1,8 +1,8 @@
 # Startup BSS clearing reconstruction
 
 `src/runtime/clear_bss.c` reconstructs the Ultra Sun base routine at
-`0x00100024`. Status: **compiled and behavior-tested, nonmatching; not yet
-integrated into a game image**. `ultrasun_clear_bss` is an inferred descriptive
+`0x00100024`. Status: **compiled, integrated into the main image, and
+behavior-tested, nonmatching**. `ultrasun_clear_bss` is an inferred descriptive
 name, not a recovered export name.
 
 ## Evidence and interface
@@ -60,7 +60,8 @@ execution. All four original/candidate comparisons pass.
 
 Five source-owned negative harness probes reject a no-op even on already-zero
 memory, callee-saved register corruption, a nonzero store, a byte store, and
-a write at the exclusive end. The repository suite passes 23 tests.
+a write at the exclusive end. The repository suite passes 27 tests, including
+source-owned receipt and split-policy checks.
 
 ## Reproduce
 
@@ -79,12 +80,52 @@ must produce that dossier through the [full-image analysis workflow](FULL_ANALYS
 Compilation receipts retain source, object, target, and compiler identities.
 Raw instructions and generated objects remain private.
 
-## Next gate
+## Integration proof
 
-The main builder still selects the original startup clearer. Before replacing
-it, extend the existing compiled-object selection and independent preservation
-checks to cover both its body and literal pool. The remaining startup literals
-at `0x00100048` and `0x0010004c` must remain intact. Current runtime packages
-still contain only the earlier constructor-helper replacement. No startup
-execution, gameplay result, or additional reconstruction coverage in those
-packages is claimed for this new function.
+[Integration #21](https://github.com/tylergraydev/UltraSunnyMoon/issues/21), under
+foundation epic #4, adds `--bss-object` to the main builder. Unchanged remains
+the default; this candidate requires `--allow-nonmatching`. Compilation and
+behavior receipts bind current source, object, pinned code/exheader, compiler,
+and BSS harness identities. Retained receipt digests detect later modification;
+they are provenance records, not cryptographic attestations of execution.
+
+With BSS selected, the splitter expands `startup_zero_helper` to 36 bytes and
+retains the final eight bytes as `original_startup_literals`. Linker response
+and map select `build/startup_zero_helper.o`. Independent verification checks
+split coverage, selected payloads, all three sections and load mappings, and
+every raw-image byte. No post-link original-byte overlay is applied.
+
+| Policy | Changed bytes | Original bytes outside replacements verified |
+| --- | ---: | ---: |
+| Unchanged | 0 | 5,914,624 |
+| Constructor only | 27 | 5,914,590 |
+| BSS only | 18 | 5,914,588 |
+| Both | 45 | 5,914,554 |
+
+BSS-only image SHA-256:
+`2d53a2141095bd3039bb56ecee26fe41a40dbebc92a92489ec5c963ad2023ea7`.
+Combined image SHA-256:
+`1f13be78a12c7f47758271f1a8e8bd63dd4c811bb85c752b6be3f2fe6226b839`.
+The BSS payload extracted from each selected image passes all four ARM11 cases;
+the constructor passes its eight cases in constructor-only and combined images.
+Fifteen disposable negative probes reject exact-policy misuse, missing/tampered
+receipts, wrong source/object, overlap/count changes, linker fallback, original
+body reinsertion, and unrelated or preserved-literal changes.
+
+After standalone compilation and behavior checks above, use new directories:
+
+```powershell
+wsl -d Ubuntu -- python3 tools/rebuild_main.py extracted/base/exefs/code.bin extracted/base/exheader.bin analysis/private/bss-image-my-run --bss-object analysis/private/bss-my-run/Os.o --allow-nonmatching
+.local/venv/Scripts/python.exe tools/verify_bss_behavior.py extracted/base/exefs/code.bin extracted/base/exheader.bin analysis/private/bss-my-run/Os.o --build-directory analysis/private/bss-image-my-run --report analysis/private/bss-image-my-run/behavior.json
+```
+
+Add `--helper-object analysis/private/helper-source-final/Os.o` for both functions.
+For that build, run the constructor harness with `--build-directory` and
+`--exheader extracted/base/exheader.bin`; the older `--image` gate allows only
+a constructor replacement. Run `tools/probe_bss_integration.py` with code,
+exheader, build directory, BSS object, and a new private destination to reproduce
+the negative checks.
+
+Current emulator packages still contain only the earlier constructor replacement.
+Integrated harness execution does not establish BSS execution in Azahar or
+gameplay; those remain separate runtime gates in #19.

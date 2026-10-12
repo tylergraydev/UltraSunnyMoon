@@ -8,7 +8,8 @@ baseline in [issue #17](https://github.com/tylergraydev/UltraSunnyMoon/issues/17
 
 There are zero compiled source replacements in this unchanged baseline.
 The separate [constructor-helper build](FIRST_SOURCE.md) contains one;
-the [BSS reconstruction](STARTUP_BSS.md) awaits integration. This baseline verifies build
+the [BSS reconstruction](STARTUP_BSS.md) is selectable alone or alongside it.
+This baseline verifies build
 machinery using preserved original bytes; it does not establish compiler
 identity, rebuilt container installation, game execution, or source coverage.
 

@@ -85,15 +85,23 @@ def execute(payload, *, count, stride, null_constructor=False, arm_callback=Fals
             'callee_saved_preserved': True, 'callback_stack_aligned': True}
 
 
-def verify(code_path, object_path, image_path=None):
+def verify(code_path, object_path, image_path=None, build_directory=None, exheader_path=None):
     code = Path(code_path).read_bytes()
     if hashlib.sha256(code).hexdigest() != CODE_SHA256:
         raise ValueError('Original image differs from pinned base')
     original, compiled = code[0x50:0x72], elf_text(Path(object_path).read_bytes())
+    if build_directory:
+        from verify_main_rebuild import verify as verify_image
+        if not exheader_path or image_path:
+            raise ValueError('Build verification requires exheader and no separate image')
+        verify_image(code_path, exheader_path, build_directory)
+        image_path = Path(build_directory)/'out/code.bin'
     image = Path(image_path).read_bytes() if image_path else None
-    if image is not None:
+    if image is not None and not build_directory:
         if len(image) != len(code) or image[:0x50] != code[:0x50] or image[0x72:] != code[0x72:] or image[0x50:0x72] != compiled:
             raise ValueError('Integrated image contains unexpected bytes or a different helper')
+    if image is not None and image[0x50:0x72] != compiled:
+        raise ValueError('Integrated helper differs from selected object')
     cases = [dict(count=0, stride=4), dict(count=1, stride=4), dict(count=5, stride=7),
              dict(count=3, stride=0), dict(count=0, stride=4, null_array=True),
              dict(count=0xffffffff, stride=0xffffffff, null_constructor=True, null_array=True),
@@ -124,8 +132,10 @@ if __name__ == '__main__':
     parser.add_argument('object')
     parser.add_argument('--report', help='Write proof to a private file')
     parser.add_argument('--image', help='Also execute the helper extracted from the rebuilt image')
+    parser.add_argument('--build-directory', help='Independently verify a multi-replacement build before execution')
+    parser.add_argument('--exheader')
     args = parser.parse_args()
-    proof = verify(args.code, args.object, args.image)
+    proof = verify(args.code, args.object, args.image, args.build_directory, args.exheader)
     if args.report:
         destination = Path(args.report).resolve()
         destination.relative_to((Path.cwd()/'analysis/private').resolve())
