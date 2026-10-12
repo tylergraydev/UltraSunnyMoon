@@ -77,9 +77,11 @@ logs, and proof artifacts remain local and ignored.
 ## Remaining execution gate
 
 Automatic approval review rejected the attempted Azahar window launch:
-“Computer Use was not approved to use azahar.” An approval request for the
-original/rebuilt comparison is pending. No launch through another method
-was attempted after that rejection.
+“Computer Use was not approved to use azahar.” The user explicitly approved
+the original/rebuilt comparison, but the subsequent launch received the
+same rejection and Azahar was absent from the Computer Use app inventory.
+Session-level app access remains unavailable. No launch through another
+method was attempted after that rejection.
 
 Once Azahar access is approved, launch the original CXI in its fresh
 profile, record actual version/configuration and any startup requirements,
