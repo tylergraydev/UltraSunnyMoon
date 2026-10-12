@@ -1,0 +1,29 @@
+# Local retail inputs and extracted resources
+/roms/
+/orig/
+/extracted/
+/assets/retail/
+*.cia
+*.3ds
+*.cxi
+*.cci
+*.cro
+*.crs
+code.bin
+exheader.bin
+romfs.bin
+# Generated analysis and build output
+/build/
+/out/
+/split/
+/.decomp/
+/.local/
+/analysis/private/
+# Local configuration
+.env
+.env.*
+!.env.example
+config.mk
+__pycache__/
+*.pyc
+node_modules/
