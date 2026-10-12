@@ -9,4 +9,9 @@
 7. **Integrate and test.** Verify that compiled source replacements were actually selected in the build, then test the affected behavior in the rebuilt game. Booting while still retaining original sections does not establish source reconstruction progress.
 8. **Port separately if desired.** A native PC version also needs host implementations for required console graphics, input, audio, storage, and OS services. A matching 3DS build does not automatically provide those.
 
-Our project has proved the analysis path for the main executable and one locally relocated module. Compiler identification, unchanged-binary rebuild, source replacement, and runtime verification remain ahead.
+Our project has proved REA analysis and unchanged-binary reconstruction for the
+main executable and one module. One nonmatching C helper is integrated and
+verified live at language selection; a second startup routine is compiled and
+behavior-tested but awaits integration. Retail compiler identification, exact
+source matching, and gameplay validation remain open. See the
+[current checkpoint](STATUS.md).

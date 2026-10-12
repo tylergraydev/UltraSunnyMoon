@@ -15,7 +15,10 @@ tracks the project phases; this note records where to resume focused work.
 - Both games boot to language selection in isolated Azahar 2126.2 profiles.
   Live RPC reads verify the respective helper bytes; private game frames confirm
   the startup screen. This proves loading, not a count of helper executions.
-- The current tooling suite passes 18 tests.
+- The startup BSS clearer now has a second C reconstruction. Both GCC profiles
+  produce a nonmatching 36-byte payload; four original/candidate ARM11 cases
+  pass. It is not yet selected in the main builder. See [its evidence](STARTUP_BSS.md).
+  The tooling suite now passes 23 tests.
 
 ## Immediate work and stop condition
 
@@ -38,8 +41,8 @@ are met.
 
 ## Next decompilation priorities
 
-1. Resolve the next small runtime function using REA evidence, with explicit
-   boundaries and behavior checks before integrating it.
+1. Extend verified compiled-object selection to the startup BSS clearer and
+   its literal pool, preserving the rest of the image.
 2. Continue [compiler matching #15](https://github.com/tylergraydev/UltraSunnyMoon/issues/15).
    A behavior-compatible GCC build does not identify the retail compiler.
 3. Continue [module loading #16](https://github.com/tylergraydev/UltraSunnyMoon/issues/16).

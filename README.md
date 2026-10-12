@@ -8,6 +8,9 @@ See [runtime preparation](docs/RUNTIME.md), [first source evidence](docs/FIRST_S
 
 ## Public roadmap
 
+The [startup BSS clearer](docs/STARTUP_BSS.md) is now a second compiled,
+behavior-tested C reconstruction. It remains nonmatching and awaits integration.
+
 [Current checkpoint and next priorities](docs/STATUS.md)
 
 [Roadmap and progress tracker](https://github.com/tylergraydev/UltraSunnyMoon/issues/1)

@@ -69,7 +69,7 @@ def require_exact(object_path, code_path):
         raise ValueError('Compiled helper does not match the original 34-byte slot; integration rejected')
 
 
-def standalone_helper(data):
+def standalone_helper(data, symbol_name='__aeabi_vec_ctor_nocookie_nodtor', thumb=True):
     """Reject external dependencies, relocation records and wrong entry symbols."""
     payload = elf_text(data)
     fields = struct.unpack_from('<16sHHIIIIIHHHHHH', data)
@@ -96,9 +96,9 @@ def standalone_helper(data):
             symbol = strings[name:].split(b'\0', 1)[0]
             if symbol and shndx == 0:
                 raise ValueError('Compiled helper has undefined symbols')
-            if symbol == b'__aeabi_vec_ctor_nocookie_nodtor':
-                if value != 1 or size != len(payload) or info != 0x12 or shndx != text_index:
-                    raise ValueError('Compiled Thumb entry/extent differs')
+            if symbol == symbol_name.encode():
+                if value != int(thumb) or size != len(payload) or info != 0x12 or shndx != text_index:
+                    raise ValueError('Compiled entry/extent differs')
                 found = True
     if not found:
         raise ValueError('Compiled helper entry symbol missing')
