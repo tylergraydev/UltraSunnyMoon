@@ -8,6 +8,8 @@ See [runtime preparation](docs/RUNTIME.md), [first source evidence](docs/FIRST_S
 
 ## Public roadmap
 
+[Current checkpoint and next priorities](docs/STATUS.md)
+
 [Roadmap and progress tracker](https://github.com/tylergraydev/UltraSunnyMoon/issues/1)
 
 The roadmap owns eight phase epics through GitHub sub-issue relationships. Phase one owns the initial actionable tasks. Later phases will be expanded as evidence clarifies their scope.
