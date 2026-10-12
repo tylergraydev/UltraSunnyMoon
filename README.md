@@ -2,9 +2,9 @@
 
 A public reverse-engineering and decompilation project for Pokémon Ultra Sun. The goal is a readable, rebuildable codebase with independently verified replacements for original game code.
 
-**Status: full base-executable analysis verified.** REA/Ghidra imports the supplied Ultra Sun base version 0 executable in roughly 82 seconds under the recorded analysis profile. Representative ARM and Thumb functions pass independent Capstone verification. Dynamic modules, compiler matching, and a rebuilt game remain future work. No reconstruction completion percentage is claimed.
+**Status: first unchanged module rebuild verified.** `AnaiTest.cro` passes a six-object split/link/container reconstruction with all 8,192 bytes matching the original. REA/Ghidra analysis of the full base executable and representative ARM/Thumb functions is independently verified. Compiler matching, compiled source replacements, and a rebuilt game remain future work. No reconstruction completion percentage is claimed.
 
-See [the decompilation workflow](docs/DECOMP_WORKFLOW.md), [module findings](docs/MODULES.md), [full-analysis findings](docs/FULL_ANALYSIS.md), [setup](docs/SETUP.md), and [target identity](docs/TARGET.md).
+See [rebuild evidence](docs/REBUILD.md), [the decompilation workflow](docs/DECOMP_WORKFLOW.md), [module findings](docs/MODULES.md), [full-analysis findings](docs/FULL_ANALYSIS.md), [setup](docs/SETUP.md), and [target identity](docs/TARGET.md).
 
 ## Public roadmap
 
