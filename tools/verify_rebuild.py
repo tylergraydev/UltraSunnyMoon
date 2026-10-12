@@ -32,8 +32,8 @@ def elf_sections(data):
 
 def elf_text(data):
     selected = elf_sections(data)
-    if set(selected) != {'.text'}:
-        raise ValueError('Expected exactly one .text section')
+    if '.text' not in selected or any(s['bytes'] for n, s in selected.items() if n != '.text'):
+        raise ValueError('Expected .text without additional initialized payloads')
     return selected['.text']['bytes']
 
 

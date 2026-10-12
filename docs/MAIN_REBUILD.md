@@ -105,10 +105,9 @@ or a complete 3DS loader model.
 
 ## Next work
 
-The verified Thumb helper `__aeabi_vec_ctor_nocookie_nodtor` is selected as
-the first main-image source candidate. Recover its calling behavior, compile
-candidate C/C++ implementations with recorded toolchain versions/options,
-and compare the resulting object against the isolated 34-byte original.
-Any integrated replacement must prove the compiled object was actually
-selected and then pass full-image and runtime checks. Compiler investigation
-remains in [#15](https://github.com/tylergraydev/UltraSunnyMoon/issues/15).
+The verified Thumb helper `__aeabi_vec_ctor_nocookie_nodtor` now has a
+[compiled C implementation](FIRST_SOURCE.md) with bounded ARM behavior checks
+and explicit nonmatching integration proof. The unchanged baseline remains
+the default build. Exact compiler matching and complete-game runtime checks
+remain open; compiler investigation continues in
+[#15](https://github.com/tylergraydev/UltraSunnyMoon/issues/15).

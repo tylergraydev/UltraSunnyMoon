@@ -20,12 +20,30 @@ def verify(code_path, exheader_path, root):
         raise ValueError('Original input identity differs')
     root = Path(root)
     plan = json.loads((root/'layout.json').read_text())
+    replacement = plan.get('replacement')
+    expected_image = bytearray(code)
+    if replacement:
+        from compile_helper import standalone_helper
+        object_data = (root/'build/aeabi_vec_ctor.o').read_bytes()
+        payload = standalone_helper(object_data)
+        if len(payload) != 34 or hashlib.sha256(object_data).hexdigest() != replacement['object_sha256']:
+            raise ValueError('Compiled replacement object differs from its receipt')
+        if replacement['source_sha256'] != hashlib.sha256(Path('src/runtime/aeabi_vec_ctor.c').read_bytes()).hexdigest():
+            raise ValueError('Compiled replacement source receipt differs')
+        behavior = replacement['behavior']
+        if behavior['code_sha256'] != code_hash or behavior['object_sha256'] != replacement['object_sha256'] or behavior['cases_passed'] != 8 or len(behavior['cases']) != 8 or behavior.get('cpu_model') != 'ARM11 MPCore' or not all(c['passed'] for c in behavior['cases']):
+            raise ValueError('Compiled replacement behavior receipt differs')
+        if replacement['policy'] == 'exact' and payload != code[0x50:0x72]:
+            raise ValueError('Exact replacement differs from original')
+        if replacement['policy'] not in ('exact', 'behavior-tested-nonmatching'):
+            raise ValueError('Unsupported replacement policy')
+        expected_image[0x50:0x72] = payload
     expected, cursor = {}, 0
     for name, offset, flags in (('.text', 0x10, 6), ('.rodata', 0x20, 2), ('.data', 0x30, 3)):
         address, pages, logical = struct.unpack_from('<III', header, offset)
         size = pages*0x1000
         expected[name] = {'address': address, 'offset': cursor, 'size': size, 'logical_size': logical,
-                          'flags': flags, 'bytes': code[cursor:cursor+size]}
+                          'flags': flags, 'bytes': bytes(expected_image[cursor:cursor+size])}
         cursor += size
     if cursor != len(code):
         raise ValueError('Input extent differs from page allocation')
@@ -43,8 +61,10 @@ def verify(code_path, exheader_path, root):
         sections = elf_sections(path.read_bytes())
         if set(sections) != {obj['section']} or sections[obj['section']]['bytes'] != code[position:position+obj['size']]:
             raise ValueError('Selected split object differs from original range')
+        is_replacement = replacement and obj['name'] == 'aeabi_vec_ctor'
         receipts.append({'name': obj['name'], 'offset': position, 'size': obj['size'],
-                         'section': obj['section'], 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
+                         'section': obj['section'], 'origin': 'compiled-source' if is_replacement else 'original-split',
+                         'sha256': replacement['object_sha256'] if is_replacement else hashlib.sha256(path.read_bytes()).hexdigest()})
         position += obj['size']
     if position != len(code) or object_paths != set((root/'split/code.bin').glob('*.o')):
         raise ValueError('Split objects do not cover the full input exactly once')
@@ -52,10 +72,18 @@ def verify(code_path, exheader_path, root):
     response = (root/'out/code.bin.txt').read_text().splitlines()
     if [Path(line.strip('"')).name for line in response] != selected_names:
         raise ValueError('Linker response file object selection differs')
+    helper_line = response[selected_names.index('aeabi_vec_ctor.o')].strip('"').replace('\\', '/')
+    helper_directory = 'build' if replacement else 'split/code.bin'
+    if not helper_line.endswith('/'+helper_directory+'/aeabi_vec_ctor.o'):
+        raise ValueError('Compiled helper selection fell back to another object')
     map_text = (root/'out/code.bin_linked.map').read_text()
     loaded_names = [Path(p).name for p in re.findall(r'^LOAD (.*\.o)$', map_text, re.MULTILINE)]
     if loaded_names != selected_names:
         raise ValueError('Linker map object selection differs')
+    selected_helper_loads = [line.replace('\\', '/') for line in map_text.splitlines()
+                            if line.startswith('LOAD ') and line.endswith('/aeabi_vec_ctor.o')]
+    if len(selected_helper_loads) != 1 or not selected_helper_loads[0].endswith('/'+helper_directory+'/aeabi_vec_ctor.o'):
+        raise ValueError('Linker map helper selection differs')
     elf = (root/'out/code.bin_linked').read_bytes()
     sections = elf_sections(elf)
     if set(sections) != set(expected):
@@ -78,14 +106,19 @@ def verify(code_path, exheader_path, root):
         if alignment <= 0 or alignment & (alignment-1) or virtual % alignment != offset % alignment:
             raise ValueError('Invalid PT_LOAD alignment')
     rebuilt = (root/'out/code.bin').read_bytes()
-    if rebuilt != code:
-        raise ValueError('Reconstructed code.bin differs from original')
-    return {'exact_match': True, 'original_bytes_verified': len(code), 'sha256': code_hash,
+    if rebuilt != expected_image:
+        raise ValueError('Reconstructed code.bin differs from selected image')
+    return {'verification_passed': True, 'exact_match': rebuilt == code,
+            'original_bytes_verified': len(code)-(34 if replacement else 0),
+            'sha256': hashlib.sha256(rebuilt).hexdigest(), 'original_sha256': code_hash,
             'exheader_sha256': header_hash, 'split_objects_verified': len(object_paths),
             'initialized_sections_verified': 3, 'load_mappings_verified': 3,
             'selected_object_receipts': receipts,
-            'source_replacements': 0, 'bss_size': struct.unpack_from('<I', header, 0x3c)[0],
-            'scope': 'Unchanged initialized image; original bytes retained; BSS and game execution not rebuilt.'}
+            'source_replacements': 1 if replacement else 0,
+            'replacement_policy': replacement['policy'] if replacement else None,
+            'changed_bytes': sum(a != b for a, b in zip(code, rebuilt)),
+            'bss_size': struct.unpack_from('<I', header, 0x3c)[0],
+            'scope': 'Initialized image with explicit original/compiled object selection; BSS and game execution unverified.'}
 
 
 if __name__ == '__main__':

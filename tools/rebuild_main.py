@@ -69,20 +69,53 @@ def worker(root, reader):
     split_dir.mkdir(parents=True)
     info = SimpleNamespace(args={'progress_reports': False})
     targets = split_by_symbols(binary, split_dir, symbols, info)
+    saved_plan = json.loads((root/'layout.json').read_text())
+    if 'replacement' in saved_plan:
+        targets = [(offset, root/'build/aeabi_vec_ctor.o' if path.stem == 'aeabi_vec_ctor' else path)
+                   for offset, path in targets]
     pipeline.LD_FLAGS = ['--entry=0x100000', '-T', str(root/'linker.ld')]
     linked = pipeline.link_all('code.bin', [p for _, p in targets], root/'out', str(root/'tools/ld'), info)
     pipeline.recreate_binary('code.bin', root/'out', str(root/'tools/objcopy'), linked, binary)
 
 
-def run(code_path, exheader_path, destination, reader):
+def run(code_path, exheader_path, destination, reader, helper_object=None, allow_nonmatching=False):
     load_reader(reader)
     code, header = Path(code_path).read_bytes(), Path(exheader_path).read_bytes()
     plan = layout(code, header)
+    replacement = None
+    if allow_nonmatching and not helper_object:
+        raise ValueError('Nonmatching permission requires a compiled helper object')
+    if helper_object:
+        from compile_helper import standalone_helper, require_exact
+        helper_object = Path(helper_object).resolve()
+        payload = standalone_helper(helper_object.read_bytes())
+        if len(payload) != 34:
+            raise ValueError('Replacement must occupy exactly the original 34-byte slot')
+        if not allow_nonmatching:
+            require_exact(helper_object, code_path)
+        comparison = json.loads((helper_object.parent/'comparison.json').read_text())
+        matches = [p for p in comparison['profiles'] if p['object'] == helper_object.name]
+        if len(matches) != 1 or matches[0]['object_sha256'] != digest(helper_object.read_bytes()):
+            raise ValueError('Compilation receipt does not bind the selected helper')
+        if comparison['source_sha256'] != digest(Path('src/runtime/aeabi_vec_ctor.c').read_bytes()) or comparison['code_sha256'] != CODE_SHA256:
+            raise ValueError('Compilation receipt source or target differs')
+        behavior = json.loads((helper_object.parent/'behavior.json').read_text())
+        if behavior['object_sha256'] != digest(helper_object.read_bytes()) or behavior['code_sha256'] != CODE_SHA256 or behavior['cases_passed'] != 8 or len(behavior['cases']) != 8 or behavior['cpu_model'] != 'ARM11 MPCore' or not all(c['passed'] for c in behavior['cases']):
+            raise ValueError('Behavior receipt does not bind the selected helper')
+        replacement = {'object_sha256': digest(helper_object.read_bytes()),
+                       'source_sha256': comparison['source_sha256'], 'compiler': comparison['compiler'],
+                       'command': matches[0]['command'], 'behavior': behavior,
+                       'policy': 'behavior-tested-nonmatching' if payload != code[0x50:0x72] else 'exact'}
+        plan['replacement'] = replacement
+        plan['source_replacements'] = 1
     root = Path(destination).resolve()
     root.relative_to((Path.cwd()/'analysis/private').resolve())
     root.mkdir(parents=True, exist_ok=False)
     for name in ('orig', 'tools', 'out'):
         (root/name).mkdir()
+    if replacement:
+        (root/'build').mkdir()
+        shutil.copyfile(helper_object, root/'build/aeabi_vec_ctor.o')
     (root/'orig/code.bin').write_bytes(code)
     (root/'orig/exheader.bin').write_bytes(header)
     (root/'layout.json').write_text(json.dumps(plan, indent=2)+'\n')
@@ -107,7 +140,7 @@ def run(code_path, exheader_path, destination, reader):
     (root/'pipeline.log').write_text(result.stdout)
     report = {'pipeline_revision': PIPELINE_REVISION, 'command': command, 'toolchain': versions,
               'code_sha256': digest(code), 'exheader_sha256': digest(header),
-              'pipeline_exit_code': result.returncode, 'source_replacements': 0}
+              'pipeline_exit_code': result.returncode, 'source_replacements': plan['source_replacements']}
     (root/'build.json').write_text(json.dumps(report, indent=2)+'\n')
     if result.returncode:
         raise SystemExit('Rebuild failed; inspect private pipeline.log')
@@ -126,5 +159,7 @@ if __name__ == '__main__':
     parser.add_argument('exheader')
     parser.add_argument('destination')
     parser.add_argument('--reader', default='.local/pipeline-reference')
+    parser.add_argument('--helper-object', help='Select the compiled helper with bound compilation/behavior receipts')
+    parser.add_argument('--allow-nonmatching', action='store_true', help='Explicitly permit a behavior-tested 34-byte nonmatch')
     args = parser.parse_args()
-    run(args.code, args.exheader, args.destination, args.reader)
+    run(args.code, args.exheader, args.destination, args.reader, args.helper_object, args.allow_nonmatching)

@@ -2,3 +2,4 @@ capstone==5.0.7
 pyctr==0.7.6
 pycryptodomex==3.24.1
 typing_extensions==4.15.0
+unicorn==2.1.4
