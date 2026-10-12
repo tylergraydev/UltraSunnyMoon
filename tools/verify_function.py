@@ -13,14 +13,16 @@ from verify_analysis import read_json
 
 
 def canonical(opcode, operands):
-    opcode = {"cpy": "mov", "bcc": "blo", "bcs": "bhs", "strcc": "strlo"}.get(opcode, opcode)
+    opcode = {"cpy": "mov", "bcc": "blo", "bcs": "bhs", "strcc": "strlo", "ldrcc": "ldrlo"}.get(opcode, opcode)
     if opcode == "push":
         opcode, operands = "stmdb", "sp!," + operands
     elif opcode == "pop":
         opcode, operands = "ldmia", "sp!," + operands
-    operands = re.sub(r"\s+", "", operands.lower().replace("#", ""))
+    operands = operands.lower().replace("#", "")
     operands = re.sub(r"(?<![a-z0-9_])(?:0x[0-9a-f]+|[0-9]+)",
                       lambda match: str(int(match[0], 16 if match[0].startswith("0x") else 10)), operands)
+    operands = re.sub(r"\s+", "", operands)
+    operands = operands.replace(',0]', ']') # Explicit zero memory displacement.
     return opcode, operands
 
 
@@ -60,7 +62,7 @@ def verify(code_path, elf_path, evidence_path, mode):
     return {"entry": value["procedure"]["address"], "mode": mode,
             "instructions": len(decoded), "function_bytes": body["total_bytes"],
             "evidence_id": evidence["evidence_id"], "target_digest_verified": True,
-            "original_payload_verified": True, "addresses_opcodes_operands_match": True,
+            "selected_payload_verified": True, "addresses_opcodes_operands_match": True,
             "scope": "selected static function; no runtime or global coverage claim"}
 
 

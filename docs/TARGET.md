@@ -34,4 +34,4 @@ These identify the supplied local dumps, not every Ultra Sun copy or decrypted c
 
 ## Coverage
 
-The initial import proof covers a bounded startup function in base code. Complete initialized segment mappings have been inspected separately. RomFS, dynamically loaded modules, compiler identity, emulator/hardware gameplay baseline, and complete-game reconstruction remain future work.
+Complete main-executable import and representative ARM/Thumb checks now pass. RomFS code-module inventory, static CRS metadata mapping, and one synthetic locally relocated CRO analysis also pass; see MODULES.md. General dynamic-module loading, compiler identity, emulator/hardware gameplay baseline, and complete-game reconstruction remain future work.

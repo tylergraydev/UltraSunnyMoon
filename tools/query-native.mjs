@@ -22,7 +22,7 @@ await mkdir(path.dirname(output), { recursive: true });
 await mkdir(output); // Refuse to overwrite an earlier run's evidence.
 console.log(JSON.stringify({ output }));
 const transport = new StdioClientTransport({ command: 'bash',
-  args: [path.join(repository, 'tools/rea-arm-full.sh'), 'mcp'], stderr: 'pipe' });
+  args: [path.join(repository, plan.profile === 'module' ? 'tools/rea-arm.sh' : 'tools/rea-arm-full.sh'), 'mcp'], stderr: 'pipe' });
 const client = new Client({ name: 'ultrasunnymoon-analysis', version: '0.1.0' });
 const started = performance.now();
 const log = createWriteStream(path.join(output, 'server.log'));

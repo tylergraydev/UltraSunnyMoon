@@ -1,0 +1,10 @@
+{
+  "run":"module",
+  "profile":"module",
+  "calls":[
+    {"name":"open_binary","arguments":{"path":"analysis/private/AnaiTest.elf","provider_id":"ghidra"}},
+    {"name":"analyze_function","arguments":{"procedure":"0x100180"}},
+    {"name":"read_function_instructions","arguments":{"procedure":"0x100180"}},
+    {"name":"close_binary","arguments":{}}
+  ]
+}
