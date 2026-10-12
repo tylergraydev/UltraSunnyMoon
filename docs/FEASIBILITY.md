@@ -4,7 +4,7 @@ Date: October 12, 2026.
 
 This records the initial bounded pilot. Later the same day, complete main-executable import and representative ARM/Thumb verification passed; see [FULL_ANALYSIS.md](FULL_ANALYSIS.md) for current results and remaining module limits.
 
-**Verdict: REA with Ghidra can analyze a verified bounded view of the supplied Ultra Sun base executable. Full-game import performance is not yet established.**
+**Initial pilot verdict: REA with Ghidra can analyze a verified bounded view of the supplied Ultra Sun base executable.** Full-main-image import was subsequently established. This historical report is not the current work queue; see [STATUS.md](STATUS.md) and [HANDOFF.md](HANDOFF.md).
 
 ## Observed evidence
 
@@ -32,7 +32,7 @@ The name is inferred, not a recovered original symbol. This is static evidence, 
 - Ubuntu 22.04 is outside REA's general documented Ubuntu 24.04+ support list, despite passing provider checks and the local pilot.
 - No game resources, binaries, cryptographic metadata, or raw retail disassembly are committed. CLI use is verified; persistent Codex MCP integration is not configured.
 
-## Next work
+## Initial next work (subsequently advanced)
 
 Tune a complete-image import with explicit analyzer choices. Confirm ARM/Thumb boundaries and module loading, identify the retail compiler, and establish an unchanged-binary rebuild before attempting a compiled replacement. Phase 2 still needs its gameplay baseline and module/resource inventory.
 

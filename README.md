@@ -6,6 +6,9 @@ A public reverse-engineering and decompilation project for Pokémon Ultra Sun. T
 
 See [runtime preparation](docs/RUNTIME.md), [first source evidence](docs/FIRST_SOURCE.md), [main rebuild evidence](docs/MAIN_REBUILD.md), [module rebuild evidence](docs/REBUILD.md), [the decompilation workflow](docs/DECOMP_WORKFLOW.md), [module findings](docs/MODULES.md), [full-analysis findings](docs/FULL_ANALYSIS.md), [setup](docs/SETUP.md), and [target identity](docs/TARGET.md).
 
+Starting a new session? Read [AGENTS.md](AGENTS.md), the
+[session handoff](docs/HANDOFF.md), and the [project overview](docs/PROJECT.md).
+
 ## Public roadmap
 
 The [startup BSS clearer](docs/STARTUP_BSS.md) is now a second compiled,

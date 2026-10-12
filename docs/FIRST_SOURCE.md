@@ -74,7 +74,9 @@ extracted from the rebuilt image passes the same eight cases.
 
 Five source-owned harness probes reject missing callbacks, wrong return
 values, corrupted callee-saved state, and unexpected memory writes while
-accepting a valid no-call return. All thirteen repository tests pass.
+accepting a valid no-call return. Thirteen repository tests passed at that
+milestone; the current suite has 23 passing tests after subsequent runtime and
+BSS harness work.
 
 These are bounded execution checks. Exception propagation, every possible
 input, full-game calling contexts, and 3DS service/runtime behavior remain

@@ -212,5 +212,6 @@ supported input-movie replay or manual game input must provide that part.
 The original/rebuilt startup checkpoint does not establish complete game
 compatibility.
 
-Phase four remains open until a working rebuilt-game comparison is
-observed. Exact compiler matching remains separate in #15.
+Phase four remains open until the reproducible gameplay acceptance in #19 is
+met. Startup comparison is already observed. Exact compiler matching remains
+separate in #15.

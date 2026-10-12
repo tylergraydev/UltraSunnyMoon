@@ -20,7 +20,14 @@ tracks the project phases; this note records where to resume focused work.
   pass. It is not yet selected in the main builder. See [its evidence](STARTUP_BSS.md).
   The tooling suite now passes 23 tests.
 
-## Immediate work and stop condition
+## Immediate work
+
+Integrate the compiled startup BSS clearer through the existing main builder,
+with independent object-selection and whole-image preservation proof. The
+[session handoff](HANDOFF.md) records exact artifacts, acceptance checks, and
+commands. Keep the unchanged and constructor-only build paths working.
+
+## Separate open runtime gate
 
 Extend [runtime validation #19](https://github.com/tylergraydev/UltraSunnyMoon/issues/19)
 with the same reproducible input sequence in both builds. First establish a

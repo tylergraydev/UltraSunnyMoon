@@ -2,6 +2,11 @@
 
 This setup analyzes local Ultra Sun inputs. It does not compile or execute the game.
 
+This document covers initial preparation and the historical bounded pilot.
+The existing workspace is already prepared. Full-image analysis, reconstruction,
+and startup runtime milestones are recorded in [STATUS.md](STATUS.md); use
+[HANDOFF.md](HANDOFF.md) to resume without repeating setup.
+
 ## Toolchain
 
 Use Ubuntu WSL on Windows, with Node.js 22.19+ in the 22.x series (or another REA-supported major), npm, Python 3, curl, git, GCC, and readelf. The initial host is Ubuntu 22.04.5 with Node 22.22.1. REA's general host diagnostic lists Ubuntu 24.04+ as supported; Ubuntu 22.04 is an explicitly tested local environment, not an upstream support claim.
@@ -45,7 +50,7 @@ py -3 -m venv .local/venv
 .\.local\venv\Scripts\python.exe tools/verify_analysis.py extracted/base/exefs/code.bin analysis/private/base-pilot-rea.json
 ```
 
-The pilot first checks a source-owned fixture, then analyzes a bounded startup view at `0x00100024`. Only the initial `0x48` bytes of executable text are mapped, together with the original read-only and data mappings and a conservative BSS provision. The entire code payload is preserved in the private ELF file, but text beyond this window is deliberately not analyzed. Full-image imports reached costly global stack/switch recovery and were stopped; full-game performance remains follow-up work.
+The pilot first checks a source-owned fixture, then analyzes a bounded startup view at `0x00100024`. Only the initial `0x48` bytes of executable text are mapped, together with the original read-only and data mappings and a conservative BSS provision. The entire code payload is preserved in the private ELF file, but text beyond this window is deliberately not analyzed. Initial full-image imports reached costly global stack/switch recovery and were stopped. A later tuned profile successfully imports the full main image; see [FULL_ANALYSIS.md](FULL_ANALYSIS.md).
 
 `rea-arm.sh` selects `ARM:LE:32:v6` and the default Ghidra compiler convention. ARM/Thumb interworking still requires review when expanding to other functions. It disables global `Stack` and `Decompiler Parameter ID` analysis for this focused pilot; the evidence records those choices. Type recovery and calling conventions remain hypotheses.
 

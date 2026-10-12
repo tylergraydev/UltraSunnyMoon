@@ -74,4 +74,4 @@ These identify local records under ignored `analysis/private/`. Raw retail instr
 
 CTRTool's base RomFS inventory lists **132 CRO files** and **one `static.crs`**, with a `.crr/static.crr` registration file. They remain separate from this main-executable import. Their relocation, load-address, and cross-module symbol relationships require investigation.
 
-The base plain region identifies Nintendo SDK `11_4_1_200_none`. This is metadata observed in the supplied game, not a recovered SDK or identification of the retail compiler. Compiler family/version/flags and a verified unchanged-binary rebuild remain open. No game execution or compiled source replacement is claimed.
+The base plain region identifies Nintendo SDK `11_4_1_200_none`. This is metadata observed in the supplied game, not a recovered SDK or identification of the retail compiler. Compiler family/version/flags remain open. This analysis milestone itself did not establish a rebuild or execution; later unchanged builds, compiled reconstructions, and startup observations are recorded in [STATUS.md](STATUS.md).

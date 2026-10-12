@@ -6,7 +6,9 @@ linked ELF also preserves the initialized text, read-only, and data regions
 at their exheader addresses. This completes the unchanged-main-image
 baseline in [issue #17](https://github.com/tylergraydev/UltraSunnyMoon/issues/17).
 
-There are zero compiled source replacements. This result verifies build
+There are zero compiled source replacements in this unchanged baseline.
+The separate [constructor-helper build](FIRST_SOURCE.md) contains one;
+the [BSS reconstruction](STARTUP_BSS.md) awaits integration. This baseline verifies build
 machinery using preserved original bytes; it does not establish compiler
 identity, rebuilt container installation, game execution, or source coverage.
 
