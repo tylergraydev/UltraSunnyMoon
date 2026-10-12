@@ -51,12 +51,12 @@ The pilot first checks a source-owned fixture, then analyzes a bounded startup v
 
 The independent check verifies instruction address coverage, opcodes, operands (including branch aliases and resolved PC-relative literal loads), the startup caller, and literal references. It reports the literal zeroing range. Preserve the full private REA evidence, including its limitations and analysis profile.
 
-CLI queries are immediately usable. Each CLI invocation imports an ephemeral analysis database and closes it afterward. Persistent Codex MCP integration is a separate convenience step and is not claimed by this setup.
+CLI queries are immediately usable. Each CLI invocation imports an ephemeral analysis database and closes it afterward. A reusable standalone REA MCP-session runner is now verified; see [FULL_ANALYSIS.md](FULL_ANALYSIS.md). Registering the server in the Codex app remains a separate convenience step.
 
 ## Check tooling and public-file boundaries
 
 ```powershell
-py -3 -m unittest discover -s tests -v
+.\.local\venv\Scripts\python.exe -m unittest discover -s tests -v
 git check-ignore roms extracted/base/exefs/code.bin analysis/private/base-analysis.elf
 git status --short
 ```

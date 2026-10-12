@@ -2,6 +2,8 @@
 
 Date: October 12, 2026.
 
+This records the initial bounded pilot. Later the same day, complete main-executable import and representative ARM/Thumb verification passed; see [FULL_ANALYSIS.md](FULL_ANALYSIS.md) for current results and remaining module limits.
+
 **Verdict: REA with Ghidra can analyze a verified bounded view of the supplied Ultra Sun base executable. Full-game import performance is not yet established.**
 
 ## Observed evidence

@@ -1,0 +1,13 @@
+{
+  "run": "full-base",
+  "calls": [
+    {"name":"open_binary","arguments":{"path":"analysis/private/base-analysis.elf","provider_id":"ghidra"}},
+    {"name":"analyze_function","arguments":{"procedure":"0x100024"}},
+    {"name":"analyze_function","arguments":{"procedure":"0x100050"}},
+    {"name":"analyze_function","arguments":{"procedure":"0x1045b4"}},
+    {"name":"list_procedures","arguments":{}},
+    {"name":"binary_overview","arguments":{}},
+    {"name":"inspect_native_load_image","arguments":{}},
+    {"name":"close_binary","arguments":{}}
+  ]
+}

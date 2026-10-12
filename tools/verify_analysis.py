@@ -16,7 +16,17 @@ from capstone.arm import ARM_OP_MEM, ARM_REG_PC
 def read_json(path):
     data = Path(path).read_bytes()
     encoding = "utf-16" if data.startswith((b"\xff\xfe", b"\xfe\xff")) else "utf-8-sig"
-    return json.loads(data.decode(encoding))
+    result = json.loads(data.decode(encoding))
+    # Support both direct CLI Evidence and retained MCP CallToolResult envelopes.
+    if "content" in result and "evidence_id" not in result:
+        structured = result.get("structuredContent")
+        if structured is not None:
+            return structured
+        text_blocks = [item["text"] for item in result["content"] if item["type"] == "text"]
+        if len(text_blocks) != 1:
+            raise ValueError("Expected one JSON Evidence text block")
+        return json.loads(text_blocks[0])
+    return result
 
 
 def verify(code_path, evidence_path, address, elf_path=None):

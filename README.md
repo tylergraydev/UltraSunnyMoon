@@ -2,9 +2,9 @@
 
 A public reverse-engineering and decompilation project for Pokémon Ultra Sun. The goal is a readable, rebuildable codebase with independently verified replacements for original game code.
 
-**Status: initial analysis pilot verified.** REA/Ghidra analyzed a bounded startup view of the supplied Ultra Sun base version 0 executable, independently checked with Capstone. Full-game import performance, compiler matching, and a rebuilt game remain future work. No reconstruction completion percentage is claimed.
+**Status: full base-executable analysis verified.** REA/Ghidra imports the supplied Ultra Sun base version 0 executable in roughly 82 seconds under the recorded analysis profile. Representative ARM and Thumb functions pass independent Capstone verification. Dynamic modules, compiler matching, and a rebuilt game remain future work. No reconstruction completion percentage is claimed.
 
-See [feasibility findings](docs/FEASIBILITY.md), [reproducible setup](docs/SETUP.md), and [target identity](docs/TARGET.md).
+See [full-analysis findings](docs/FULL_ANALYSIS.md), [initial feasibility findings](docs/FEASIBILITY.md), [setup](docs/SETUP.md), and [target identity](docs/TARGET.md).
 
 ## Public roadmap
 
@@ -31,7 +31,7 @@ The roadmap owns eight phase epics through GitHub sub-issue relationships. Phase
 
 ## Technical direction
 
-Use a pinned [REA](https://github.com/morluto/rea) source revision with Ghidra through Ubuntu WSL for agent-accessible analysis. The bounded pilot is verified; whole-image performance and module loading remain open. Reconstructed game code will use C/C++ according to binary evidence; Rust remains an option for supporting tools. Evaluate [3DS Decomp Pipeline](https://github.com/AlgebraManiacABC/3DS-Decomp-Pipeline) for splitting, comparison, linking, and module recreation. Reference [Pokémon Moon](https://github.com/gradenGnostic/pokemoon) selectively after checking applicability to Ultra Sun. A PC port is a later scope decision.
+Use a pinned [REA](https://github.com/morluto/rea) source revision with Ghidra through Ubuntu WSL for agent-accessible analysis. Main-executable imports and reusable MCP queries are verified; dynamic-module loading remains open. Reconstructed game code will use C/C++ according to binary evidence; Rust remains an option for supporting tools. Evaluate [3DS Decomp Pipeline](https://github.com/AlgebraManiacABC/3DS-Decomp-Pipeline) for splitting, comparison, linking, and module recreation. Reference [Pokémon Moon](https://github.com/gradenGnostic/pokemoon) selectively after checking applicability to Ultra Sun. A PC port is a later scope decision.
 
 ## Verification and contributions
 
