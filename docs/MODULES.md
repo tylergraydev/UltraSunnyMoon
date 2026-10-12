@@ -63,4 +63,4 @@ Skip cloning if the pinned reader already exists. Substitute the printed private
 - Carry segment-tagged imports, exports, and relocation records through splitting/linking.
 - Dynamic data/BSS allocation, imported-symbol resolution, registration hashes, runtime load order, and gameplay behavior are not established by this sample.
 - The first module proof is intentionally import-free. It does not establish that all 132 CROs can be loaded correctly.
-- The first [unchanged module reconstruction](REBUILD.md) now matches every original byte. Compiler/runtime fingerprinting and main-executable reconstruction remain open before source replacements.
+- The [unchanged module reconstruction](REBUILD.md) and [main-executable reconstruction](MAIN_REBUILD.md) now match every original byte. Compiler/runtime fingerprinting remains open before verified source replacements.

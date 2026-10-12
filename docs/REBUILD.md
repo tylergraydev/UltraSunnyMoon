@@ -96,8 +96,8 @@ retail bytes, object files, symbol CSVs, logs, and evidence stay ignored.
 Issue [#15](https://github.com/tylergraydev/UltraSunnyMoon/issues/15) remains
 open for compiler fingerprinting and first-replacement selection. The
 verified Thumb array-construction helper is a promising source candidate
-because its ABI signature has a public definition. Before replacing it,
-prove unchanged reconstruction of the main executable, recover its exact
-calling behavior, and compile candidate implementations with explicit
+because its ABI signature has a public definition. The
+[unchanged main reconstruction](MAIN_REBUILD.md) now passes. Next recover its exact
+calling behavior and compile candidate implementations with explicit
 toolchain versions/options. Larger imported modules also depend on
 [runtime loading work](https://github.com/tylergraydev/UltraSunnyMoon/issues/16).

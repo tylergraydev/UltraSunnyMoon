@@ -6,7 +6,7 @@ from pathlib import Path
 import struct
 
 
-def elf_text(data):
+def elf_sections(data):
     if data[:7] != b'\x7fELF\x01\x01\x01' or len(data) < 52:
         raise ValueError('Expected ELF32 little-endian image')
     fields = struct.unpack_from('<16sHHIIIIIHHHHHH', data)
@@ -18,17 +18,23 @@ def elf_text(data):
     sections = [struct.unpack_from('<10I', data, offset+i*40) for i in range(count)]
     names_section = sections[string_index]
     names = data[names_section[4]:names_section[4]+names_section[5]]
-    selected = []
+    selected = {}
     for section in sections:
         name = names[section[0]:].split(b'\0', 1)[0]
-        if name == b'.text':
+        if name in (b'.text', b'.rodata', b'.data'):
             start, size = section[4:6]
-            if start+size > len(data):
-                raise ValueError('Truncated .text section')
-            selected.append(data[start:start+size])
-    if len(selected) != 1:
+            if section[1] != 1 or start+size > len(data) or name.decode() in selected:
+                raise ValueError('Invalid or duplicated initialized section')
+            selected[name.decode()] = {'address': section[3], 'flags': section[2],
+                                       'bytes': data[start:start+size]}
+    return selected
+
+
+def elf_text(data):
+    selected = elf_sections(data)
+    if set(selected) != {'.text'}:
         raise ValueError('Expected exactly one .text section')
-    return selected[0]
+    return selected['.text']['bytes']
 
 
 def verify(module, root):

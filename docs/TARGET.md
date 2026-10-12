@@ -34,4 +34,4 @@ These identify the supplied local dumps, not every Ultra Sun copy or decrypted c
 
 ## Coverage
 
-Complete main-executable import and representative ARM/Thumb checks now pass. RomFS code-module inventory, static CRS metadata mapping, and one synthetic locally relocated CRO analysis also pass; see MODULES.md. General dynamic-module loading, compiler identity, emulator/hardware gameplay baseline, and complete-game reconstruction remain future work.
+Complete main-executable import and representative ARM/Thumb checks now pass. Unchanged main-image and one CRO reconstruction match every original byte; see MAIN_REBUILD.md and REBUILD.md. RomFS code-module inventory, static CRS metadata mapping, and one synthetic locally relocated CRO analysis also pass; see MODULES.md. General dynamic-module loading, compiler identity, emulator/hardware gameplay baseline, and complete-game reconstruction remain future work.
