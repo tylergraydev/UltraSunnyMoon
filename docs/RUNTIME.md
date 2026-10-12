@@ -108,6 +108,49 @@ Use `--screen` only to record a screen actually reported by the user.
 
 ## Remaining execution gate
 
+### Azahar's own RPC interface
+
+The prepared 2126.2 build includes the official `scripting/AzaharRPC.py`
+client. It supports process selection, memory reads/writes, game-frame
+capture, and performance statistics. Our `probe_runtime_rpc.py` exposes
+only process selection, a bounded helper-byte read, performance queries,
+and optional rendered-frame capture. It binds the client hash, Ultra Sun
+title ID, and expected original/rebuilt helper bytes to private evidence.
+No writes to game memory or controller-input injection are exposed.
+
+RPC is disabled in the current original-game session. A read-only transport
+probe did not reach a server, so no RPC screenshot or live-byte proof is
+claimed yet. Azahar's [debug configuration](https://github.com/azahar-emu/azahar/blob/2126.2/src/citra_qt/configuration/configure_debug.cpp)
+only allows RPC to change while emulation is stopped. To prevent the app
+from overwriting an external configuration edit on exit, close the prepared
+Azahar before running:
+
+```powershell
+.\tools\configure-runtime-rpc.ps1
+```
+
+The tool rejects active prepared profiles, verifies executable receipts,
+backs up existing configurations, and sets both the RPC value and its
+QSettings default marker. A source-owned configuration fixture verifies
+setting preservation and the backup. Only isolated profiles are touched.
+
+After manually reopening the original profile and its game:
+
+```powershell
+.\.local\venv\Scripts\python.exe tools/probe_runtime_rpc.py analysis/private/azahar-runtime/original/azahar-windows-msys2-2126.2 extracted/base/exefs/code.bin analysis/private/my-original-rpc-proof
+```
+
+Use a new private output directory. The client connects to localhost UDP
+45987 with bounded request timeouts. Azahar's [server](https://github.com/azahar-emu/azahar/blob/2126.2/src/core/rpc/udp_server.cpp)
+binds UDP 45987 on all IPv4 interfaces; the wrapper's localhost destination
+does not change that server binding. No firewall changes are performed.
+Only run one RPC-enabled test instance at a time because the port is fixed.
+
+For the rebuilt profile, substitute its runtime directory and
+`analysis/private/helper-integrated-final/out/code.bin`. The probe refuses
+to accept original helper bytes as proof of the rebuilt image. Native
+window automation remains a separate permission mechanism.
+
 Automatic approval review rejected the attempted Azahar window launch:
 “Computer Use was not approved to use azahar.” The user explicitly approved
 the original/rebuilt comparison, but the subsequent launch received the
