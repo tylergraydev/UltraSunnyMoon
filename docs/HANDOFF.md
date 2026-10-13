@@ -21,7 +21,7 @@ and the unchanged startup literals. Eight recorded runtime settings agree;
 four runtime-evidence negative probes and 31 source-owned tests pass.
 
 Both variants now replay the same movie in fresh profiles and reach the same
-Professor Kukui/Rockruff PokÃ©mon Trainers dialogue. Movie/log/RPC receipts pass;
+Professor Kukui/Rockruff Pokémon Trainers dialogue. Movie/log/RPC receipts pass;
 eight settings match and no input-type desynchronization is logged through
 capture. Current suite: 40 tests passing. Both test processes were stopped.
 
