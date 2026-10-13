@@ -66,8 +66,10 @@ are met.
 2. Continue [compiler matching #15](https://github.com/tylergraydev/UltraSunnyMoon/issues/15).
    A behavior-compatible GCC build does not identify the retail compiler.
 3. Continue [module loading #16](https://github.com/tylergraydev/UltraSunnyMoon/issues/16).
-   LangSelect appears in the startup loader log; loaded module bytes and resolved
-   imports still need verification.
+   Static named-import resolution is complete for all 132 base CROs: 19,525 names
+   resolve against `static.crs` with independent parser agreement (see
+   [MODULES](MODULES.md)). Indexed/anonymous imports, runtime BSS/registration,
+   load order, and loaded-byte comparison remain open.
 
 Native PC execution remains a later porting phase. The current rebuilt game
 still requires a 3DS environment.

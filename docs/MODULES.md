@@ -64,3 +64,28 @@ Skip cloning if the pinned reader already exists. Substitute the printed private
 - Dynamic data/BSS allocation, imported-symbol resolution, registration hashes, runtime load order, and gameplay behavior are not established by this sample.
 - The first module proof is intentionally import-free. It does not establish that all 132 CROs can be loaded correctly.
 - The [unchanged module reconstruction](REBUILD.md) and [main-executable reconstruction](MAIN_REBUILD.md) now match every original byte. Compiler/runtime fingerprinting remains open before verified source replacements.
+
+## Named import resolution (#16)
+
+Scope: all **132 base CROs** plus `static.crs`, read from the decrypted RomFS into a new private run. Named imports are resolved by exact name against the **4,916** named exports of `static.crs`. Reader semantics follow Azahar's `ldr_ro` helper, used for reference only; the retail loader is not observed here.
+
+| Measure | Result |
+| --- | ---: |
+| Modules with named imports | 100 of 132 |
+| Named import entries | 19,525 |
+| Named imports resolved by `static.crs` | 19,525 (none unresolved; only `static.crs` was consulted) |
+| Import relocation records | 45,221 |
+| Records in named-import batches (all absolute, type 2) | 43,848 |
+| Records of indexed/anonymous imports (not verified here) | 1,373 across 47 modules |
+| Modules with multi-record batches | 95 |
+
+Each named import's batch offset selects its first record, and the batch ends at the first record whose batch-end flag is set. Batches are disjoint. A `static.crs` target is `segment address + offset`; its Thumb bit is preserved, and absolute relocations write target plus addend. Every original patch word is zero, so the loader's writes are the only source of final values.
+
+**Verification.** `tools/resolve_cro_imports.py` parses raw records and writes receipts. `tools/verify_cro_imports.py` re-derives the same facts through the pinned pipeline reader and requires exact agreement: all named imports, batch lengths, patch locations, addends, export targets, and expected words. A tampered expected word in a disposable receipt copy is rejected. Eleven source-owned synthetic tests cover resolution, Thumb targets, multi-record batches, unresolved names, unsupported types, out-of-range patches, duplicate exports, and wrong magic. `tools/survey_cro_imports.py` records the import-table survey. Two Thumb targets from `AriizumiTest.cro` decode as plausible functions in the main executable (one begins with a load-compare-branch sequence; another begins with `bx lr`, consistent with a stub).
+
+**Still open for #16.**
+
+- Indexed and anonymous imports (47 modules) need dependency-module export resolution and their own checks. Their records are counted but not applied.
+- Runtime data/BSS allocation is not observed. Header BSS sizes are nonzero in all 132 modules (largest 47,816 bytes). Their placement, registration (`.crr/static.crr`), hash handling, and load order are unverified.
+- The runtime loader's application of these relocations is not observed in Azahar. Statically resolved targets do not prove execution; comparison with live memory is still needed.
+- No selected function has been reconstructed from a module import path. Static target checks are sanity probes, not matches.
