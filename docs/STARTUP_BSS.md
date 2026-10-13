@@ -82,7 +82,7 @@ Raw instructions and generated objects remain private.
 
 ## Integration proof
 
-[Integration #21](https://github.com/tylergraydev/UltraSunnyMoon/issues/21), under
+[Completed integration #21](https://github.com/tylergraydev/UltraSunnyMoon/issues/21), under
 foundation epic #4, adds `--bss-object` to the main builder. Unchanged remains
 the default; this candidate requires `--allow-nonmatching`. Compilation and
 behavior receipts bind current source, object, pinned code/exheader, compiler,
@@ -128,5 +128,6 @@ the negative checks.
 
 The combined image is now [packaged and boot-tested](RUNTIME.md) alongside the
 original. Live RPC reads match both replacements and the preserved literals;
-inspected frames show language selection. Routine execution counts and gameplay
-remain separate runtime gates in #19.
+inspected frames and the same movie now reproduce controllable bedroom movement
+in both variants. #19's bounded first gameplay acceptance is complete. Routine
+execution counts and broader game compatibility remain unverified.

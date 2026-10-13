@@ -31,22 +31,27 @@ tracks the project phases; this note records where to resume focused work.
   input-type desynchronization through capture; live bytes and eight settings
   match their expected inputs. The suite now passes 40 tests. This is progression
   beyond language selection, not first controllable gameplay.
+- The bounded first gameplay gate is now complete: original and combined builds
+  reproduce the same bedroom movement after the same avatar/name/wake-up movie.
+  Thirty-one paired captures verify movie/log/frame/live-byte identities; root
+  and an independent reviewer confirm rightward and forward avatar movement.
+  Eight logged settings and the 400% speed limit match (CPU clock stays 100%).
+  All 60 source-owned tests pass. #21 is closed; #19's bounded acceptance is met.
 
 ## Immediate work
 
-Extend the verified movie sequence through avatar/name setup toward first
-controllable gameplay. Use fresh profiles and capture while playback is active;
-the completion dialog pauses emulation and can block RPC. The
-[session handoff](HANDOFF.md) records exact artifacts and commands.
+Resume bounded source reconstruction with the following startup initializer's
+retained evidence, while compiler matching and module loading continue on their
+separate tracks. The [session handoff](HANDOFF.md) records the completed runtime
+artifacts and the next source evidence selection.
 
-## Separate open runtime gate
+## Completed bounded runtime gate and limits
 
-Extend [runtime validation #19](https://github.com/tylergraydev/UltraSunnyMoon/issues/19)
-with the same reproducible input sequence in both builds. First establish a
-checkpoint beyond the introduction; first controllable gameplay is still the
-acceptance target. Azahar supports CLI input-movie playback, but a valid movie
-must match the game's actual peripheral polling order. A generated sequence is
-an experiment until logs establish that playback stayed synchronized.
+[Runtime validation #19](https://github.com/tylergraydev/UltraSunnyMoon/issues/19)
+now has the same reproducible first controllable gameplay path in both builds.
+See [RUNTIME](RUNTIME.md) for exact plan hashes, settings, captures, reproduction,
+and independent review. Both profiles start with empty saves and use the same
+input movie. Both logs remain synchronized through the observed movement path.
 
 The earlier empty-log movie trial supplies no replay evidence. The supported
 short option `-p` now loads successfully; source inspection suggests the long
@@ -54,15 +59,16 @@ option collided with the compression dispatcher. The selected longer replay
 has matching movie/log/RPC receipts for both variants. It is stopped after
 checkpoint capture; full-movie completion and exact timing remain unproven.
 
-Keep emulator integration bounded to this comparison. If input playback needs
-substantial new infrastructure, document the remaining gap in #19 and continue
-independent reconstruction work. Keep #19 open until its acceptance conditions
-are met.
+This is a bounded startup/setup/bedroom comparison, not complete game
+compatibility. Routine execution counts, exceptions, battles/overworld coverage,
+full-movie completion, and exact timing determinism remain unverified. They are
+outside #19's completed first-path acceptance; no later phase is automatically
+closed by this result.
 
 ## Next decompilation priorities
 
-1. Extend the combined/original runtime comparison beyond language selection;
-   keep gameplay validation #19 open until its acceptance is met.
+1. Review the retained following-startup initializer evidence for the next
+   bounded C reconstruction; preserve the completed runtime proof.
 2. Continue [compiler matching #15](https://github.com/tylergraydev/UltraSunnyMoon/issues/15).
    A behavior-compatible GCC build does not identify the retail compiler.
 3. Continue [module loading #16](https://github.com/tylergraydev/UltraSunnyMoon/issues/16).

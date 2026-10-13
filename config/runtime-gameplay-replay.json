@@ -1,0 +1,32 @@
+{
+  "duration_seconds": 1200,
+  "movie_id": 5,
+  "pulses": [
+    {"start_seconds": 15, "end_seconds": 108, "period_samples": 702, "held_samples": 59, "buttons": ["A"]},
+    {"start_seconds": 140, "end_seconds": 500, "period_samples": 702, "held_samples": 59, "buttons": ["A"]},
+    {"start_seconds": 580, "end_seconds": 640, "period_samples": 702, "held_samples": 59, "buttons": ["A"]}
+  ],
+  "touches": [
+    {"start_seconds": 120, "end_seconds": 120.15, "x": 300, "y": 75},
+    {"start_seconds": 120.5, "end_seconds": 120.65, "x": 300, "y": 75},
+    {"start_seconds": 121, "end_seconds": 121.15, "x": 300, "y": 75},
+    {"start_seconds": 121.5, "end_seconds": 121.65, "x": 300, "y": 75},
+    {"start_seconds": 122, "end_seconds": 122.15, "x": 300, "y": 75},
+    {"start_seconds": 122.5, "end_seconds": 122.65, "x": 300, "y": 75},
+    {"start_seconds": 123, "end_seconds": 123.15, "x": 300, "y": 75},
+    {"start_seconds": 123.5, "end_seconds": 123.65, "x": 300, "y": 75},
+    {"start_seconds": 125, "end_seconds": 125.15, "x": 110, "y": 145},
+    {"start_seconds": 126, "end_seconds": 126.15, "x": 200, "y": 110},
+    {"start_seconds": 127, "end_seconds": 127.15, "x": 200, "y": 180},
+    {"start_seconds": 128, "end_seconds": 128.15, "x": 200, "y": 180},
+    {"start_seconds": 129, "end_seconds": 129.15, "x": 180, "y": 110},
+    {"start_seconds": 132, "end_seconds": 132.15, "x": 300, "y": 110}
+  ],
+  "holds": [
+    {"start_seconds": 550, "end_seconds": 553, "circle_x": 150, "circle_y": 0},
+    {"start_seconds": 560, "end_seconds": 563, "circle_x": -150, "circle_y": 0},
+    {"start_seconds": 650, "end_seconds": 653, "circle_x": -150, "circle_y": 0},
+    {"start_seconds": 670, "end_seconds": 673, "circle_x": 150, "circle_y": 0},
+    {"start_seconds": 690, "end_seconds": 693, "circle_x": 0, "circle_y": -150}
+  ]
+}

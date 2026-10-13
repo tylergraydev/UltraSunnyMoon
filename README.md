@@ -2,7 +2,7 @@
 
 A public reverse-engineering and decompilation project for Pokémon Ultra Sun. The goal is a readable, rebuildable codebase with independently verified replacements for original game code.
 
-**Status: original and rebuilt games boot to language selection.** The combined rebuilt game loads compiled C replacements for the startup BSS clearer and Thumb constructor helper, verified through RPC readbacks. Both are behavior-tested but nonmatching; all image bytes outside their selected ranges remain original. Exact matching, retail compiler identification, execution counts, and gameplay beyond the startup menu remain open. No reconstruction completion percentage is claimed.
+**Status: original and combined rebuilt games reproduce controllable bedroom gameplay.** The same input movie advances both through player setup and directional movement, with live BSS/constructor replacement bytes and rendered frames verified. Both C replacements are behavior-tested but nonmatching; all image bytes outside their selected ranges remain original. Exact matching, retail compiler identification, execution counts, and broader game compatibility remain open. No reconstruction completion percentage is claimed.
 
 See [runtime preparation](docs/RUNTIME.md), [first source evidence](docs/FIRST_SOURCE.md), [main rebuild evidence](docs/MAIN_REBUILD.md), [module rebuild evidence](docs/REBUILD.md), [the decompilation workflow](docs/DECOMP_WORKFLOW.md), [module findings](docs/MODULES.md), [full-analysis findings](docs/FULL_ANALYSIS.md), [setup](docs/SETUP.md), and [target identity](docs/TARGET.md).
 

@@ -1,10 +1,10 @@
 # Session handoff
 
-Updated 2026-10-12 after paired input-movie progression to the introduction (#19).
+Updated 2026-10-12 after paired first controllable gameplay acceptance (#19/#21).
 Read [AGENTS.md](../AGENTS.md), [STATUS](STATUS.md), and [PROJECT](PROJECT.md).
 This file records local resume details; it is not a claim of full decompilation.
 
-## Next task: extend the replay through player setup toward gameplay
+## Next task: resume bounded startup reconstruction
 
 The main builder now selects the BSS clearer with `--bss-object`, alone or
 alongside `--helper-object`. Nonmatching remains explicitly selected with
@@ -21,18 +21,31 @@ and the unchanged startup literals. Eight recorded runtime settings agree;
 four runtime-evidence negative probes and 31 source-owned tests pass.
 
 Both variants now replay the same movie in fresh profiles and reach the same
-Professor Kukui/Rockruff Pokémon Trainers dialogue. Movie/log/RPC receipts pass;
+Professor Kukui/Rockruff PokÃ©mon Trainers dialogue. Movie/log/RPC receipts pass;
 eight settings match and no input-type desynchronization is logged through
 capture. Current suite: 40 tests passing. Both test processes were stopped.
 
-Next extend the sequence through avatar/name selection toward first controllable
-gameplay. Read [RUNTIME](RUNTIME.md) and `tools/startup_movie.py` first. Use fresh
-profiles, the same movie in both variants, and supported short option `-p`.
-The long option appears to collide with the compression dispatcher. Capture
-while replay is still active: completion pauses emulation and opens a dialog,
-after which RPC may stop responding. The selected movie has a 180-second horizon,
-A pulses only from 15 to 75 seconds, and neutral inputs thereafter; capture
-around 95 seconds. No complete-movie or exact-timing claim is made. Keep #19 open.
+The newer public `config/runtime-gameplay-replay.json` now advances both variants
+through avatar/name setup and into controllable bedroom gameplay. Frames at
+host seconds 160/171/177 show the avatar left near the TV, crossing right toward
+the bed, and moving forward toward the camera. Root and an independent reviewer
+inspected both sequences. All 31 paired movie/log/RPC captures pass; eight
+logged settings and the explicit 400% speed limit agree, with CPU clock 100%.
+Logs show no input-type desynchronization through capture. Current suite: 60
+tests passing. Both processes are stopped. #21 is closed after published
+integration; #19's bounded first gameplay acceptance is complete.
+
+Next review the following startup initializer at `0x001045b4` against retained
+`full-base-final/3-analyze_function.json`, independently checking its boundary,
+mode, instructions, literals, and dependencies before choosing a C scope. Do not
+automatically resume emulator automation. Compiler matching #15 and the module
+track #16 can continue independently; avoid overlapping other agents' edits.
+
+To reproduce the completed gameplay gate, follow [RUNTIME](RUNTIME.md). Use
+fresh profiles and short playback option `-p`; capture before movie completion,
+which pauses emulation and opens a dialog. The selected gameplay movie has a
+1,200-second horizon and is stopped after movement captures. No full-game,
+execution-count, full-movie-completion, or exact-timing claim is made.
 
 Start with:
 
@@ -60,7 +73,8 @@ Completed acceptance for integration:
    unchanged baseline and first-helper behavior after builder changes.
 
 [Integration #21](https://github.com/tylergraydev/UltraSunnyMoon/issues/21) is linked
-under foundation epic #4. [#20](https://github.com/tylergraydev/UltraSunnyMoon/issues/20)
+under foundation epic #4 and closed after publication and independent review.
+[#20](https://github.com/tylergraydev/UltraSunnyMoon/issues/20)
 remains closed for reconstruction and isolated behavior only.
 
 ## Selected local evidence and artifacts
@@ -100,6 +114,14 @@ All paths below are relative to the repository root and ignored by Git:
 | `analysis/private/replay-original-runtime-2/` | Original introduction log/config/package observation |
 | `analysis/private/replay-rebuilt-runtime-2/` | Combined introduction log/config/package observation |
 | `analysis/private/replay-comparison-3/` | Verified paired introduction checkpoint/settings receipt using public log writer |
+| `analysis/private/gameplay-plan-final-1/` | Exact regenerated selected gameplay movie, copied public plan, generator/plan receipts |
+| `analysis/private/gameplay-plan-1/` | Byte-identical movie actually passed to both launch commands |
+| `analysis/private/gameplay-runtime-4/` | Fresh original/combined profiles, 400% speed limit, now stopped |
+| `analysis/private/gameplay-original-run-1/` | Original 31-capture timeline, per-capture movie/log/RPC evidence |
+| `analysis/private/gameplay-rebuilt-run-1/` | Combined 31-capture timeline, per-capture movie/log/RPC evidence |
+| `analysis/private/gameplay-original-runtime-1/` | Original final log/config/package receipt |
+| `analysis/private/gameplay-rebuilt-runtime-1/` | Combined final log/config/package receipt |
+| `analysis/private/gameplay-comparison-final-1/` | All paired capture verifications, configuration/launch/plan/main-image proof |
 | `analysis/private/rpc-original-verified/` | Original startup live bytes and game frame |
 | `analysis/private/rpc-rebuilt-verified/` | Rebuilt startup live bytes and game frame |
 | `analysis/private/movie-trial/` | Failed synthetic movie trial and restored startup proof |
@@ -130,7 +152,7 @@ Do not bootstrap again unless a concrete dependency is missing or broken.
 
 ## Quick checks
 
-Run from the repository root. Current suite: 40 tests passing.
+Run from the repository root. Current suite: 60 tests passing.
 
 ```powershell
 git status --short
@@ -141,6 +163,7 @@ git status --short
 .local/venv/Scripts/python.exe tools/verify_main_rebuild.py extracted/base/exefs/code.bin extracted/base/exheader.bin analysis/private/startup-both-integrated-1
 .local/venv/Scripts/python.exe tools/compare_runtime_rpc.py analysis/private/rpc-both-original-2 analysis/private/rpc-both-rebuilt-1 extracted/base/exefs/code.bin analysis/private/startup-both-integrated-1/out/code.bin
 .local/venv/Scripts/python.exe tools/verify_startup_replay.py analysis/private/replay-original-checkpoint-4 analysis/private/replay-rebuilt-checkpoint-4 extracted/base/exefs/code.bin analysis/private/startup-both-integrated-1/out/code.bin analysis/private/startup-replay-plan-2/startup.ctm
+.local/venv/Scripts/python.exe tools/verify_startup_replay.py analysis/private/gameplay-original-run-1/at-177 analysis/private/gameplay-rebuilt-run-1/at-177 extracted/base/exefs/code.bin analysis/private/startup-both-integrated-1/out/code.bin analysis/private/gameplay-plan-final-1/startup.ctm --plan config/runtime-gameplay-replay.json
 ```
 
 To produce a new BSS compilation receipt, use a new output directory:
@@ -162,8 +185,9 @@ reads prove loading, not execution counts. Early original frame
 `rpc-both-original-1` shows the opening animation; its prematurely recorded
 menu description in `runtime-both-original-1` has a `CORRECTION.txt` note.
 Use the selected `*-original-2` evidence for the actual menu checkpoint.
-Gameplay beyond language selection remains open in
-[#19](https://github.com/tylergraydev/UltraSunnyMoon/issues/19).
+The paired first controllable bedroom path now meets
+[#19](https://github.com/tylergraydev/UltraSunnyMoon/issues/19). Broader game
+compatibility and routine execution counts remain unverified.
 
 Both test processes were stopped after collection. Check current process
 identity/state rather than assuming it persists. Only one RPC-enabled

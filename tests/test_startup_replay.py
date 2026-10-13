@@ -67,6 +67,22 @@ class ReplayReceiptTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             retain_replay_log(runtime, self.movie, self.runs[1])
 
+    def test_rehashed_wrong_movie_id_rejected_by_independent_verifier(self):
+        root = self.runs[1]
+        log = b'Loaded Movie, ID: 0000000000000003\n'
+        (root/'replay-log.txt').write_bytes(log)
+        receipt = json.loads((root/'replay.json').read_text())
+        receipt['log_sha256'] = hashlib.sha256(log).hexdigest()
+        (root/'replay.json').write_text(json.dumps(receipt))
+        with self.assertRaises(ValueError):
+            self.check()
+
+    def test_changed_plan_rejected(self):
+        plan = self.root/'plan.json'
+        plan.write_text(json.dumps({'duration_seconds': 180, 'movie_id': 2}))
+        with patch.object(verify_startup_replay, 'verify_rpc', return_value={}), self.assertRaises(ValueError):
+            verify_startup_replay.verify(*self.runs, 'original-code', 'rebuilt-code', self.movie, plan)
+
 
 if __name__ == '__main__':
     unittest.main()

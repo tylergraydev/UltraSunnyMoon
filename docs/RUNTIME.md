@@ -2,9 +2,9 @@
 
 The original and rebuilt Ultra Sun base applications are packaged locally
 as decrypted standalone CXIs. Both pass container and payload verification.
-**Both original and rebuilt games now reach the language-selection screen,
-with live helper bytes and RPC frames verified.** Gameplay beyond this
-startup checkpoint remains unverified. The runtime comparison remains open in
+**Original and combined rebuilt games now reproduce controllable bedroom
+gameplay with the same movie, live code readbacks, and inspected RPC frames.**
+The bounded startup/first-gameplay acceptance is complete in
 [#19](https://github.com/tylergraydev/UltraSunnyMoon/issues/19).
 
 ## Packages
@@ -97,8 +97,8 @@ resolved imports have not been read back from runtime memory.
 
 Fresh-profile logs also include missing save-data/cache files and stubbed
 services. Their presence alone is not a crash result. Both visible startup
-screens are now confirmed through RPC frames; the first gameplay path
-remains open.
+screens are confirmed through RPC frames. The newer paired gameplay checkpoint
+below supersedes the earlier startup-only limit.
 
 Collect a manually launched run without controlling its window:
 
@@ -147,7 +147,114 @@ language-menu boot does not prove exception compatibility, execution counts
 for this helper, or gameplay/title/overworld compatibility. Those remain
 separate gates.
 
-## Remaining execution gate
+## Bounded gameplay acceptance and earlier checkpoints
+
+### First controllable gameplay comparison (2026-10-12)
+
+[Runtime validation #19](https://github.com/tylergraydev/UltraSunnyMoon/issues/19)
+now meets its first reproducible gameplay acceptance. Original and combined
+BSS/constructor builds replay the same public
+[input plan](../config/runtime-gameplay-replay.json) in separate fresh profiles.
+The sequence selects the default avatar, enters a fixed test name using touch,
+continues the introduction, wakes the player, and supplies directional input in
+the starting bedroom. Both variants show the same bounded movement path:
+
+| Capture at approximately host seconds | Observed state, both variants |
+| --- | --- |
+| 160 | Avatar stands on the left side near the TV |
+| 171 | Avatar has crossed right toward the bed |
+| 177 | Avatar has moved forward and faces the camera |
+
+The corresponding circle-pad holds are right at movie seconds 670..673 and
+down at 690..693, following wake-up and a leftward hold. Scene landmarks,
+different avatar positions, facing direction, and camera tracking corroborate
+player control; the result is not based on merely loading the bedroom scene.
+Both root and an independent reviewing agent inspected the six key frames.
+Animation phases differ, so no pixel-identical or exact-timing claim is made.
+
+The selected movie SHA-256 is
+`4eb05f47ed3b807709138ab8b4eb914dedbf7a6af16f70994f4ad52b40ea6481`;
+the plan SHA-256 is
+`c02cf85d90f14f857030f46e27fcb4d786b65ffe942745a95c181c8e20618bad`.
+The 1,200-second horizon is a guard against premature playback completion;
+both runs are stopped after capture rather than allowed to reach that horizon.
+There are 280,800 pad samples, paired with touch records. Movie ID 5 and the
+pinned runtime revision are bound in the evidence.
+
+The emulator speed limit is explicitly **400% in both profiles**, while game
+CPU clock remains **100%**. Eight logged runtime settings agree, as do the
+selected speed-limit settings and module load sequences. This shortens wall
+time without changing the plan's emulated input samples. New profiles start
+with empty game saves; only global configuration is copied. Existing gameplay
+profiles and the original dump are preserved.
+
+Thirty-one paired RPC captures pass frame integrity, movie/log identity,
+independently checked loaded movie ID, live constructor/BSS/literal readback,
+and exact regeneration of the selected plan. The final log/config and package
+hashes agree with their receipts. Neither retained log reports input-type
+desynchronization or a movie revision warning. The compiled main image still
+passes full object/section/load/range preservation checks. An independent agent
+reran the key paired verifier and confirmed the movement and settings.
+
+The suite passes 60 source-owned tests, including wrong loaded movie ID even
+with a rehashed log, altered plan, poll boundaries, conflicting coordinates,
+and preservation of the older default movie identity. Retail frames, live
+bytes, logs, configurations, and packages remain private.
+
+This completes the issue's bounded first controllable gameplay comparison.
+It does not establish full-game compatibility, battles/overworld coverage,
+exception behavior, routine execution counts, exact timing determinism, or
+completion of the entire movie. Both replacements remain nonmatching.
+
+#### Reproduce the paired gameplay path
+
+Run the following from the repository root, reusing the verified combined
+package and existing pinned preparation. Use new private directories. First
+generate the exact selected plan and prepare two fresh profiles:
+
+```powershell
+.local/venv/Scripts/python.exe tools/startup_movie.py analysis/private/my-gameplay-plan --plan config/runtime-gameplay-replay.json
+.\tools\prepare-runtime.ps1 -Destination analysis/private/my-gameplay-profiles
+```
+
+Copy the same reference `qt-config.ini` into each fresh profile's `user/config`
+directory, without copying any saves or NAND data. Before either profile runs,
+set `frame_limit=400` and `frame_limit\default=false` in both configurations,
+then enable RPC with `configure-runtime-rpc.ps1 -RuntimeDirectory
+analysis/private/my-gameplay-profiles`. Preserve the reference settings listed
+above (CPU JIT, 100% CPU clock, OpenGL, hardware/shader JIT, resolution 1, New
+3DS, automatic region). Configuration snapshots bind the settings actually used.
+
+For each variant sequentially, set `$variant` to `original` or `rebuilt` and
+run this capture sequence. No other RPC-enabled instance may be active:
+
+```powershell
+$variant = 'original' # Repeat as rebuilt after stopping this process.
+$runtime = (Resolve-Path "analysis/private/my-gameplay-profiles/$variant/azahar-windows-msys2-2126.2").Path
+$exe = Join-Path $runtime 'azahar.exe'
+$movie = (Resolve-Path 'analysis/private/my-gameplay-plan/startup.ctm').Path
+$package = (Resolve-Path "analysis/private/runtime-both-packages-1/$variant.cxi").Path
+$code = if ($variant -eq 'original') { 'extracted/base/exefs/code.bin' } else { 'analysis/private/startup-both-integrated-1/out/code.bin' }
+$run = "analysis/private/my-gameplay-$variant"
+$process = Start-Process -FilePath $exe -ArgumentList @('-p', ('"'+$movie+'"'), ('"'+$package+'"')) -WorkingDirectory $runtime -WindowStyle Hidden -PassThru
+foreach ($checkpoint in 160,171,177) {
+    while (((Get-Date)-$process.StartTime).TotalSeconds -lt $checkpoint) { Start-Sleep -Milliseconds 500 }
+    .local/venv/Scripts/python.exe tools/probe_runtime_rpc.py $runtime $code "$run/at-$checkpoint" --movie $movie
+}
+$actual = Get-CimInstance Win32_Process -Filter "ProcessId=$($process.Id)"
+if (-not $actual -or $actual.ExecutablePath -ine $exe) { throw 'Process identity changed' }
+Stop-Process -Id $actual.ProcessId
+.local/venv/Scripts/python.exe tools/collect_runtime.py "$runtime/user" $package "$run/runtime"
+```
+
+Independently inspect both frame sequences for the movement described above.
+Capture timing is approximate; if startup/shader delays differ substantially,
+capture neighboring frames while playback remains active and record their
+order and elapsed times. Do not accept an unobserved movement result.
+
+```powershell
+.local/venv/Scripts/python.exe tools/verify_startup_replay.py analysis/private/my-gameplay-original/at-177 analysis/private/my-gameplay-rebuilt/at-177 extracted/base/exefs/code.bin analysis/private/startup-both-integrated-1/out/code.bin analysis/private/my-gameplay-plan/startup.ctm --plan config/runtime-gameplay-replay.json
+```
 
 ### Replayed introduction checkpoint (2026-10-12)
 
@@ -204,7 +311,8 @@ Then pass original/rebuilt evidence directories, their selected raw code images,
 and the movie to `verify_startup_replay.py`. Verify process identity before
 stopping each test instance. This checkpoint is still an introduction, not
 controllable gameplay. Extend the same bounded approach through avatar/name
-selection next; keep #19 open.
+selection was the next step at that milestone; the newer gameplay result above
+completes the bounded acceptance.
 
 ### Combined BSS and constructor startup check (2026-10-12)
 
@@ -295,13 +403,10 @@ Native window-control access remains unavailable. Subsequent work uses the
 separately authorized Azahar scripting and game-file CLI interfaces, without
 desktop screenshot capture or injected Windows input.
 
-Azahar's API now supplies live-byte proof and rendered-frame observation.
-Next extend the comparison beyond language selection into a reproducible
-gameplay path. Controller input is not exposed by the shipped RPC client;
-supported input-movie replay or manual game input must provide that part.
-The original/rebuilt startup checkpoint does not establish complete game
-compatibility.
+Azahar's API supplies live-byte proof and rendered-frame observation. Supported
+input-movie replay now supplies the reproducible first gameplay path above;
+controller input is not exposed by the shipped RPC client. The result does
+not establish complete game compatibility.
 
-Phase four remains open until the reproducible gameplay acceptance in #19 is
-met. Startup comparison is already observed. Exact compiler matching remains
-separate in #15.
+The bounded gameplay acceptance in #19 is met. Phase/roadmap closure remains a
+separate scope review. Exact compiler matching remains separate in #15.

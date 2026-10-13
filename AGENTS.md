@@ -20,7 +20,8 @@ The public [roadmap issue #1](https://github.com/tylergraydev/UltraSunnyMoon/iss
 and its phase sub-issues track work. Keep findings, acceptance conditions, and
 remaining gaps current. Do not close an issue merely because a partial milestone
 works. BSS reconstruction is #20; integration is implemented under #21.
-Runtime progression remains open in #19.
+The bounded first controllable gameplay comparison is completed under #19;
+broader game compatibility remains unverified.
 
 ## Target and evidence rules
 
@@ -80,7 +81,7 @@ Do not publish raw disassembly, decompiler dossiers, or game assets.
   to bypass it. CLI/RPC work has separate authorization and remains usable.
 - The first synthetic movie trial failed before RPC became available. Do not
   treat it as a valid replay. Keep emulator automation bounded; source
-  reconstruction can continue while gameplay validation #19 remains open.
+  reconstruction can continue independently of later gameplay validation.
 
 ## Finish and hand off
 
