@@ -149,6 +149,39 @@ separate gates.
 
 ## Remaining execution gate
 
+### Combined BSS and constructor startup check (2026-10-12)
+
+The combined [startup build](STARTUP_BSS.md) is packaged in a new private run.
+The original CXI still has the digest above. The combined CXI SHA-256 is
+`95f7d7029f1d85218671175c1beb82b128bb30b0f092e3a9c2b1f38ceeb95086`,
+and its code SHA-256 is
+`1f13be78a12c7f47758271f1a8e8bd63dd4c811bb85c752b6be3f2fe6226b839`.
+Independent verification checks the original partition, ExeFS entries and
+container hashes, selected code, and every other container byte. Exactly 109
+bytes differ: 45 replacement bytes and 64 required hash bytes. Assets, modules,
+extended header, and all other regions remain original.
+
+Sequential Azahar CLI/RPC runs reach language selection with English highlighted
+in both variants. The probe now reads the 36-byte BSS body/literal range at
+`0x00100024` plus eight preserved startup-literal bytes, alongside the 34-byte
+constructor. All loaded bytes match their selected images; the two preserved
+startup literals agree across variants. The comparator checks both startup
+readbacks and rendered-frame integrity. Four source-owned startup-evidence
+regressions raise the repository suite to 31 passing tests.
+
+An initial original frame caught the opening ocean animation. Its prematurely
+recorded language-selection label is invalid and has a private correction note.
+Only the later settled original frame supports the checkpoint comparison.
+No input movie or controller input was used, and no gameplay progression is
+claimed. Startup readbacks prove loading; routine execution counts remain
+unverified. Both test processes were stopped after evidence collection.
+
+For combined-build reproduction, pass its main-build directory to the package
+tool, its `out/code.bin` to the rebuilt RPC probe, and use newly captured original
+and rebuilt RPC evidence with the comparator. Historical constructor-only
+evidence remains supported. New startup evidence must be paired; mixing old
+constructor-only observations with a new startup readback is rejected.
+
 ### Azahar's own RPC interface
 
 The prepared 2126.2 build includes the official `scripting/AzaharRPC.py`

@@ -25,7 +25,8 @@ def load_client(runtime_directory):
 def probe(runtime_directory, code_path, destination, screenshot=True):
     code = Path(code_path).read_bytes()
     known = {'b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09': 'original',
-             'c557617562525a2959a8fc3763b1398825b861ed69960646022dd34dd7ce2736': 'rebuilt-nonmatching'}
+             'c557617562525a2959a8fc3763b1398825b861ed69960646022dd34dd7ce2736': 'rebuilt-nonmatching',
+             '1f13be78a12c7f47758271f1a8e8bd63dd4c811bb85c752b6be3f2fe6226b839': 'rebuilt-nonmatching'}
     code_hash = hashlib.sha256(code).hexdigest()
     if code_hash not in known:
         raise ValueError('Expected one of the verified original/rebuilt code images')
@@ -46,9 +47,13 @@ def probe(runtime_directory, code_path, destination, screenshot=True):
         actual = client.read_memory(0x100050, 34)
         if actual != code[0x50:0x72]:
             raise ValueError('Loaded helper bytes differ from the selected code image')
+        startup = client.read_memory(0x100024, 44)
+        if startup != code[0x24:0x50]:
+            raise ValueError('Loaded BSS or preserved startup literals differ from selected image')
         stats = client.perf_stats(reset=False)
         root.mkdir(parents=True)
         (root/'loaded-helper.bin').write_bytes(actual)
+        (root/'loaded-startup.bin').write_bytes(startup)
         frame_info = None
         if screenshot:
             frame = client.screenshot(res_scale=1)
@@ -62,6 +67,9 @@ def probe(runtime_directory, code_path, destination, screenshot=True):
                   'helper_address': '0x100050', 'helper_size': 34,
                   'loaded_helper_sha256': hashlib.sha256(actual).hexdigest(),
                   'loaded_helper_verified': True, 'performance': stats, 'frame': frame_info,
+                  'startup_address': '0x100024', 'startup_size': 44,
+                  'loaded_startup_sha256': hashlib.sha256(startup).hexdigest(),
+                  'loaded_startup_verified': True,
                   'scope': 'Live selected-process bytes and optional rendered game frame; full gameplay not asserted'}
         (root/'observations.json').write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')
         print(json.dumps(report, indent=2))

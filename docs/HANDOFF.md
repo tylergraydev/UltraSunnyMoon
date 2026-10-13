@@ -1,10 +1,10 @@
 # Session handoff
 
-Updated 2026-10-12 after verified startup BSS integration (#21).
+Updated 2026-10-12 after combined-build packaging and live startup comparison (#19).
 Read [AGENTS.md](../AGENTS.md), [STATUS](STATUS.md), and [PROJECT](PROJECT.md).
 This file records local resume details; it is not a claim of full decompilation.
 
-## Next task: bounded runtime comparison of the combined startup build
+## Next task: reproducible progression beyond language selection
 
 The main builder now selects the BSS clearer with `--bss-object`, alone or
 alongside `--helper-object`. Nonmatching remains explicitly selected with
@@ -13,11 +13,19 @@ policies pass independent image verification. The BSS payload extracted from
 both selected builds passes four cases; the constructor extracted from its
 two selected builds passes eight. Fifteen negative probes and 27 unit tests pass.
 
-Next package `analysis/private/startup-both-integrated-1` into a new private
-runtime directory using `tools/package_runtime.py` and the pinned base container.
-Read [RUNTIME](RUNTIME.md) first. Reuse the supported CLI/RPC approach for a
-bounded startup comparison; do not assume this new image already boots or that
-live replacement bytes prove execution. Leave gameplay gate #19 open.
+The combined build is now packaged in `analysis/private/runtime-both-packages-1`.
+Independent verification passes with 109 changed container bytes (45 replacement
+bytes and 64 required hash bytes). Both original and combined games reach
+language selection with English highlighted. RPC reads verify both routines
+and the unchanged startup literals. Eight recorded runtime settings agree;
+four runtime-evidence negative probes and 31 source-owned tests pass.
+
+Next establish the same input sequence and checkpoint beyond language selection
+in both variants. Read [RUNTIME](RUNTIME.md) first. The shipped RPC interface
+does not provide button input; use supported, validated input-movie playback or
+manual input. Do not retry the failed synthetic movie as if it were valid proof.
+Keep automation bounded and leave gameplay gate #19 open. Live replacement-byte
+reads prove loading, not execution counts.
 
 Start with:
 
@@ -72,6 +80,12 @@ All paths below are relative to the repository root and ignored by Git:
 | `analysis/private/rebuild-main-final/` | Unchanged main build |
 | `analysis/private/rebuild-module-final/` | Unchanged AnaiTest module build |
 | `analysis/private/runtime-packages/` | Verified original and constructor-only rebuilt CXIs |
+| `analysis/private/runtime-both-packages-1/` | Verified original and combined CXIs, package/verification receipts |
+| `analysis/private/rpc-both-original-2/` | Settled original startup bytes and inspected RPC frame |
+| `analysis/private/rpc-both-rebuilt-1/` | Combined startup bytes and inspected RPC frame |
+| `analysis/private/runtime-both-original-2/` | Original log/config/package observation |
+| `analysis/private/runtime-both-rebuilt-1/` | Combined log/config/package observation |
+| `analysis/private/runtime-both-comparison-1/` | Paired comparison receipt and four disposable negative trials |
 | `analysis/private/rpc-original-verified/` | Original startup live bytes and game frame |
 | `analysis/private/rpc-rebuilt-verified/` | Rebuilt startup live bytes and game frame |
 | `analysis/private/movie-trial/` | Failed synthetic movie trial and restored startup proof |
@@ -102,7 +116,7 @@ Do not bootstrap again unless a concrete dependency is missing or broken.
 
 ## Quick checks
 
-Run from the repository root. Current suite: 27 tests passing.
+Run from the repository root. Current suite: 31 tests passing.
 
 ```powershell
 git status --short
@@ -111,6 +125,7 @@ git status --short
 .local/venv/Scripts/python.exe tools/verify_bss_behavior.py extracted/base/exefs/code.bin extracted/base/exheader.bin analysis/private/bss-source-1/Os.o
 .local/venv/Scripts/python.exe tools/verify_main_rebuild.py extracted/base/exefs/code.bin extracted/base/exheader.bin analysis/private/helper-integrated-final
 .local/venv/Scripts/python.exe tools/verify_main_rebuild.py extracted/base/exefs/code.bin extracted/base/exheader.bin analysis/private/startup-both-integrated-1
+.local/venv/Scripts/python.exe tools/compare_runtime_rpc.py analysis/private/rpc-both-original-2 analysis/private/rpc-both-rebuilt-1 extracted/base/exefs/code.bin analysis/private/startup-both-integrated-1/out/code.bin
 ```
 
 To produce a new BSS compilation receipt, use a new output directory:
@@ -126,14 +141,17 @@ BSS selection gate; retained proof has not been overwritten.
 
 ## Runtime boundary and open work
 
-Both existing runtime packages reach language selection. The rebuilt package
-contains the compiled constructor helper; it still retains the original BSS
-clearer. Live replacement-byte reads prove loading, not execution counts.
+Constructor-only and combined rebuilt packages reach language selection.
+The combined package contains both compiled replacements. Live replacement-byte
+reads prove loading, not execution counts. Early original frame
+`rpc-both-original-1` shows the opening animation; its prematurely recorded
+menu description in `runtime-both-original-1` has a `CORRECTION.txt` note.
+Use the selected `*-original-2` evidence for the actual menu checkpoint.
 Gameplay beyond language selection remains open in
 [#19](https://github.com/tylergraydev/UltraSunnyMoon/issues/19).
 
-An ordinary rebuilt Azahar test instance was running at handoff. Check current
-process identity/state rather than assuming it persists. Only one RPC-enabled
+Both test processes were stopped after collection. Check current process
+identity/state rather than assuming it persists. Only one RPC-enabled
 instance may run at a time. Native desktop control was unavailable; supported
 CLI and RPC work. The synthetic movie trial exited before RPC became available
 with an empty log; its cause remains unknown. Do not resume that detour as the

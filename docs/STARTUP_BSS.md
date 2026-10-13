@@ -126,6 +126,7 @@ a constructor replacement. Run `tools/probe_bss_integration.py` with code,
 exheader, build directory, BSS object, and a new private destination to reproduce
 the negative checks.
 
-Current emulator packages still contain only the earlier constructor replacement.
-Integrated harness execution does not establish BSS execution in Azahar or
-gameplay; those remain separate runtime gates in #19.
+The combined image is now [packaged and boot-tested](RUNTIME.md) alongside the
+original. Live RPC reads match both replacements and the preserved literals;
+inspected frames show language selection. Routine execution counts and gameplay
+remain separate runtime gates in #19.

@@ -22,13 +22,17 @@ tracks the project phases; this note records where to resume focused work.
   ranges; 15 negative probes reject invalid selection/proof. See
   [integration evidence](STARTUP_BSS.md) and [#21](https://github.com/tylergraydev/UltraSunnyMoon/issues/21).
   The tooling suite now passes 27 tests.
+- The combined BSS/constructor CXI now passes independent packaging checks and
+  reaches language selection alongside the original. RPC readbacks verify both
+  compiled routines and the preserved startup literals. The current suite passes
+  31 tests. This proves loading and startup, not execution counts or gameplay.
 
 ## Immediate work
 
-Package the verified combined startup build for a bounded original/rebuilt
-runtime comparison, preserving the existing constructor-only proof. Integration
-and isolated execution are complete; BSS execution in the emulator is unproven.
-The [session handoff](HANDOFF.md) records exact artifacts and commands.
+Establish the same reproducible progression beyond language selection in both
+variants. Combined-build packaging, startup, and live-byte checks are complete;
+routine execution counts remain unproven. The [session handoff](HANDOFF.md)
+records exact artifacts and commands.
 
 ## Separate open runtime gate
 
@@ -51,8 +55,8 @@ are met.
 
 ## Next decompilation priorities
 
-1. Package the verified combined startup image and collect bounded runtime
-   evidence; keep gameplay validation #19 open until its acceptance is met.
+1. Extend the combined/original runtime comparison beyond language selection;
+   keep gameplay validation #19 open until its acceptance is met.
 2. Continue [compiler matching #15](https://github.com/tylergraydev/UltraSunnyMoon/issues/15).
    A behavior-compatible GCC build does not identify the retail compiler.
 3. Continue [module loading #16](https://github.com/tylergraydev/UltraSunnyMoon/issues/16).
