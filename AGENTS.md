@@ -19,7 +19,8 @@ Start a new session by reading:
 The public [roadmap issue #1](https://github.com/tylergraydev/UltraSunnyMoon/issues/1)
 and its phase sub-issues track work. Keep findings, acceptance conditions, and
 remaining gaps current. Do not close an issue merely because a partial milestone
-works. Completed BSS reconstruction is #20; integration remains the next task.
+works. BSS reconstruction is #20; integration is implemented under #21.
+Runtime progression remains open in #19.
 
 ## Target and evidence rules
 

@@ -149,6 +149,63 @@ separate gates.
 
 ## Remaining execution gate
 
+### Replayed introduction checkpoint (2026-10-12)
+
+Original and combined builds now advance beyond language selection using the
+same CTM input movie in two fresh portable profiles, with empty initial saves
+and matching global settings. Both inspected RPC frames show Professor Kukui
+holding Rockruff at the same Pokémon Trainers dialogue. Both retain the verified
+live constructor/BSS/literal bytes. Eight recorded runtime settings agree.
+
+The selected movie SHA-256 is
+`a1fbd184dfc17f999e01fc089c5d9572ca6d06aa28cfe147eba32992dbf40fba`.
+It contains 42,120 pad samples, paired with neutral touch records, at the
+emulator's 234 Hz pad rate. A is held for 59 samples every 702 samples, from
+sample 3,510 inclusive through 17,550 exclusive; all later inputs are neutral.
+The 180-second horizon permits a settled capture around 95 seconds before
+completion. Both retained logs report movie ID 2 loaded and no input-type
+desynchronization or revision warning through capture. Playback was stopped
+after capture; completion of the entire movie and timing determinism are not
+claimed. Frame hashes differ because animation phases differ.
+
+The supported short playback option `-p` loads successfully. The pinned
+[entry dispatcher](https://github.com/azahar-emu/azahar/blob/2126.2/src/citra_meta/main.cpp),
+[CLI option scan](https://github.com/azahar-emu/azahar/blob/2126.2/src/citra_cli/citra_cli.cpp),
+and [capture options](https://github.com/azahar-emu/azahar/blob/2126.2/src/citra_cli/citra_cli.h)
+suggest long-option collision with the compression dispatcher as the cause of
+the earlier empty-log trial. Do not use that failed run as replay proof.
+The [Qt frontend](https://github.com/azahar-emu/azahar/blob/2126.2/src/citra_qt/citra_qt.cpp)
+pauses emulation and opens a dialog at movie completion. A 90-second trial lost
+RPC response at that boundary; the selected longer movie avoids that boundary
+while collecting evidence. No native desktop control was used.
+
+`startup_movie.py` generates and statically checks this bounded sequence.
+`probe_runtime_rpc.py --movie` retains raw log bytes and binds the selected
+movie ID/hash. `verify_startup_replay.py` checks both movie/log receipts and
+RPC evidence; visual checkpoint inspection remains separate. An early private
+capture script translated log newlines on Windows; corrected copies preserve
+the logged text's original hash, and the earlier copies remain retained.
+The public capture path now preserves bytes and has a CRLF regression test.
+The source-owned suite passes 40 tests.
+
+To reproduce, prepare new profiles, copy the same chosen global configuration
+only, enable RPC, and use new evidence directories. Do not copy used save data.
+Generate the movie and launch each variant sequentially:
+
+```powershell
+.local/venv/Scripts/python.exe tools/startup_movie.py analysis/private/my-replay-plan
+# Use the corresponding fresh profile executable and verified CXI.
+# Launch arguments: -p "C:\code\UltraSunnyMoon\analysis\private\my-replay-plan\startup.ctm" "<package.cxi>"
+# Capture while playback is still running, around 95 seconds after launch:
+.local/venv/Scripts/python.exe tools/probe_runtime_rpc.py <runtime-directory> <selected-code.bin> analysis/private/my-replay-evidence --movie analysis/private/my-replay-plan/startup.ctm
+```
+
+Then pass original/rebuilt evidence directories, their selected raw code images,
+and the movie to `verify_startup_replay.py`. Verify process identity before
+stopping each test instance. This checkpoint is still an introduction, not
+controllable gameplay. Extend the same bounded approach through avatar/name
+selection next; keep #19 open.
+
 ### Combined BSS and constructor startup check (2026-10-12)
 
 The combined [startup build](STARTUP_BSS.md) is packaged in a new private run.

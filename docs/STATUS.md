@@ -26,27 +26,33 @@ tracks the project phases; this note records where to resume focused work.
   reaches language selection alongside the original. RPC readbacks verify both
   compiled routines and the preserved startup literals. The current suite passes
   31 tests. This proves loading and startup, not execution counts or gameplay.
+- A fixed input movie now advances original and combined builds to the same
+  Kukui/Rockruff introduction dialogue in fresh profiles. Retained logs show no
+  input-type desynchronization through capture; live bytes and eight settings
+  match their expected inputs. The suite now passes 40 tests. This is progression
+  beyond language selection, not first controllable gameplay.
 
 ## Immediate work
 
-Establish the same reproducible progression beyond language selection in both
-variants. Combined-build packaging, startup, and live-byte checks are complete;
-routine execution counts remain unproven. The [session handoff](HANDOFF.md)
-records exact artifacts and commands.
+Extend the verified movie sequence through avatar/name setup toward first
+controllable gameplay. Use fresh profiles and capture while playback is active;
+the completion dialog pauses emulation and can block RPC. The
+[session handoff](HANDOFF.md) records exact artifacts and commands.
 
 ## Separate open runtime gate
 
 Extend [runtime validation #19](https://github.com/tylergraydev/UltraSunnyMoon/issues/19)
 with the same reproducible input sequence in both builds. First establish a
-checkpoint beyond language selection; first controllable gameplay is still the
+checkpoint beyond the introduction; first controllable gameplay is still the
 acceptance target. Azahar supports CLI input-movie playback, but a valid movie
 must match the game's actual peripheral polling order. A generated sequence is
 an experiment until logs establish that playback stayed synchronized.
 
-The first private synthetic pad/touch movie trial exited before RPC became
-available and produced an empty runtime log. Its cause is unresolved; it supplies
-no runtime-validation evidence. Resume from the verified ordinary startup before
-investigating movie playback further.
+The earlier empty-log movie trial supplies no replay evidence. The supported
+short option `-p` now loads successfully; source inspection suggests the long
+option collided with the compression dispatcher. The selected longer replay
+has matching movie/log/RPC receipts for both variants. It is stopped after
+checkpoint capture; full-movie completion and exact timing remain unproven.
 
 Keep emulator integration bounded to this comparison. If input playback needs
 substantial new infrastructure, document the remaining gap in #19 and continue

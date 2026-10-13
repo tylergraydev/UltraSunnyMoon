@@ -22,7 +22,21 @@ def load_client(runtime_directory):
     return module.AzaharRPC
 
 
-def probe(runtime_directory, code_path, destination, screenshot=True):
+def retain_replay_log(runtime_directory, movie_path, root):
+    from startup_movie import inspect, verify_log
+    movie = Path(movie_path).read_bytes()
+    log = (Path(runtime_directory)/'user/log/azahar_log.txt').read_bytes()
+    text = log.decode('utf-8', errors='replace')
+    status = verify_log(text)
+    movie_id = int.from_bytes(movie[40:48], 'little')
+    if f'Loaded Movie, ID: {movie_id:016X}' not in text:
+        raise ValueError('Loaded movie ID differs from selected movie')
+    replay = dict(status, movie=inspect(movie), log_sha256=hashlib.sha256(log).hexdigest())
+    (Path(root)/'replay-log.txt').write_bytes(log)
+    (Path(root)/'replay.json').write_text(json.dumps(replay, indent=2)+'\n', encoding='utf-8')
+
+
+def probe(runtime_directory, code_path, destination, screenshot=True, movie_path=None):
     code = Path(code_path).read_bytes()
     known = {'b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09': 'original',
              'c557617562525a2959a8fc3763b1398825b861ed69960646022dd34dd7ce2736': 'rebuilt-nonmatching',
@@ -72,6 +86,8 @@ def probe(runtime_directory, code_path, destination, screenshot=True):
                   'loaded_startup_verified': True,
                   'scope': 'Live selected-process bytes and optional rendered game frame; full gameplay not asserted'}
         (root/'observations.json').write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')
+        if movie_path:
+            retain_replay_log(runtime_directory, movie_path, root)
         print(json.dumps(report, indent=2))
         return report
     finally:
@@ -84,8 +100,9 @@ if __name__ == '__main__':
     parser.add_argument('code')
     parser.add_argument('destination')
     parser.add_argument('--no-screenshot', action='store_true')
+    parser.add_argument('--movie', help='Bind a selected movie and byte-preserved runtime log to the RPC capture')
     args = parser.parse_args()
     try:
-        probe(args.runtime_directory, args.code, args.destination, not args.no_screenshot)
+        probe(args.runtime_directory, args.code, args.destination, not args.no_screenshot, args.movie)
     except (TimeoutError, ConnectionResetError) as error:
         raise SystemExit(f'Azahar RPC is unavailable. Enable it before starting the game. Transport: {error}')

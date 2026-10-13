@@ -1,10 +1,10 @@
 # Session handoff
 
-Updated 2026-10-12 after combined-build packaging and live startup comparison (#19).
+Updated 2026-10-12 after paired input-movie progression to the introduction (#19).
 Read [AGENTS.md](../AGENTS.md), [STATUS](STATUS.md), and [PROJECT](PROJECT.md).
 This file records local resume details; it is not a claim of full decompilation.
 
-## Next task: reproducible progression beyond language selection
+## Next task: extend the replay through player setup toward gameplay
 
 The main builder now selects the BSS clearer with `--bss-object`, alone or
 alongside `--helper-object`. Nonmatching remains explicitly selected with
@@ -20,12 +20,19 @@ language selection with English highlighted. RPC reads verify both routines
 and the unchanged startup literals. Eight recorded runtime settings agree;
 four runtime-evidence negative probes and 31 source-owned tests pass.
 
-Next establish the same input sequence and checkpoint beyond language selection
-in both variants. Read [RUNTIME](RUNTIME.md) first. The shipped RPC interface
-does not provide button input; use supported, validated input-movie playback or
-manual input. Do not retry the failed synthetic movie as if it were valid proof.
-Keep automation bounded and leave gameplay gate #19 open. Live replacement-byte
-reads prove loading, not execution counts.
+Both variants now replay the same movie in fresh profiles and reach the same
+Professor Kukui/Rockruff Pokémon Trainers dialogue. Movie/log/RPC receipts pass;
+eight settings match and no input-type desynchronization is logged through
+capture. Current suite: 40 tests passing. Both test processes were stopped.
+
+Next extend the sequence through avatar/name selection toward first controllable
+gameplay. Read [RUNTIME](RUNTIME.md) and `tools/startup_movie.py` first. Use fresh
+profiles, the same movie in both variants, and supported short option `-p`.
+The long option appears to collide with the compression dispatcher. Capture
+while replay is still active: completion pauses emulation and opens a dialog,
+after which RPC may stop responding. The selected movie has a 180-second horizon,
+A pulses only from 15 to 75 seconds, and neutral inputs thereafter; capture
+around 95 seconds. No complete-movie or exact-timing claim is made. Keep #19 open.
 
 Start with:
 
@@ -86,6 +93,13 @@ All paths below are relative to the repository root and ignored by Git:
 | `analysis/private/runtime-both-original-2/` | Original log/config/package observation |
 | `analysis/private/runtime-both-rebuilt-1/` | Combined log/config/package observation |
 | `analysis/private/runtime-both-comparison-1/` | Paired comparison receipt and four disposable negative trials |
+| `analysis/private/startup-replay-plan-2/` | Selected 180-second movie and generator/format receipt |
+| `analysis/private/movie-runtime-2/` | Fresh original/rebuilt replay profiles; now stopped |
+| `analysis/private/replay-original-checkpoint-4/` | Selected original RPC frame/bytes and byte-preserved movie/log receipt |
+| `analysis/private/replay-rebuilt-checkpoint-4/` | Selected combined RPC frame/bytes and byte-preserved movie/log receipt |
+| `analysis/private/replay-original-runtime-2/` | Original introduction log/config/package observation |
+| `analysis/private/replay-rebuilt-runtime-2/` | Combined introduction log/config/package observation |
+| `analysis/private/replay-comparison-3/` | Verified paired introduction checkpoint/settings receipt using public log writer |
 | `analysis/private/rpc-original-verified/` | Original startup live bytes and game frame |
 | `analysis/private/rpc-rebuilt-verified/` | Rebuilt startup live bytes and game frame |
 | `analysis/private/movie-trial/` | Failed synthetic movie trial and restored startup proof |
@@ -116,7 +130,7 @@ Do not bootstrap again unless a concrete dependency is missing or broken.
 
 ## Quick checks
 
-Run from the repository root. Current suite: 31 tests passing.
+Run from the repository root. Current suite: 40 tests passing.
 
 ```powershell
 git status --short
@@ -126,6 +140,7 @@ git status --short
 .local/venv/Scripts/python.exe tools/verify_main_rebuild.py extracted/base/exefs/code.bin extracted/base/exheader.bin analysis/private/helper-integrated-final
 .local/venv/Scripts/python.exe tools/verify_main_rebuild.py extracted/base/exefs/code.bin extracted/base/exheader.bin analysis/private/startup-both-integrated-1
 .local/venv/Scripts/python.exe tools/compare_runtime_rpc.py analysis/private/rpc-both-original-2 analysis/private/rpc-both-rebuilt-1 extracted/base/exefs/code.bin analysis/private/startup-both-integrated-1/out/code.bin
+.local/venv/Scripts/python.exe tools/verify_startup_replay.py analysis/private/replay-original-checkpoint-4 analysis/private/replay-rebuilt-checkpoint-4 extracted/base/exefs/code.bin analysis/private/startup-both-integrated-1/out/code.bin analysis/private/startup-replay-plan-2/startup.ctm
 ```
 
 To produce a new BSS compilation receipt, use a new output directory:
@@ -153,9 +168,14 @@ Gameplay beyond language selection remains open in
 Both test processes were stopped after collection. Check current process
 identity/state rather than assuming it persists. Only one RPC-enabled
 instance may run at a time. Native desktop control was unavailable; supported
-CLI and RPC work. The synthetic movie trial exited before RPC became available
-with an empty log; its cause remains unknown. Do not resume that detour as the
-default next task.
+CLI and RPC work. The earlier movie trial remains invalid; the short-option
+replay now supplies a paired introduction checkpoint. The 90-second experiment
+lost RPC response near completion and is not the selected proof. Checkpoint-2
+receipts had a newline conversion mismatch; checkpoint-3 contains corrected
+copies matching the original text hashes, with correction notes. Checkpoint-4
+uses the public log writer against the retained profile logs, preserving actual
+log bytes and validating the loaded movie ID. Retained earlier evidence was not
+overwritten. The public `--movie` path has a CRLF regression test.
 
 Other open tracks: [compiler matching #15](https://github.com/tylergraydev/UltraSunnyMoon/issues/15)
 and [module imports/loading #16](https://github.com/tylergraydev/UltraSunnyMoon/issues/16).
